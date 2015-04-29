@@ -2,6 +2,8 @@
 % phase channel; the purpose of this code is to align all the frames to
 % correct for drift and other movement over time
 
+% Run this code on all positions pre-processed by ImageJ macro
+
 % Original code by Meng Jin; last edited by Yuan Zhao
 
 
