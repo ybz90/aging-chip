@@ -2,4 +2,4 @@
 
 Pipeline for segmenting, tracking, and analyzing cells in aging chip traps
 
-Updated versions of Meng's code with optimizations for mask generation and image file organization.
+Renamed .m files; added preprocess.ijm ImageJ macro for automatically processing phase, fluorescence, and nuclear marker stacks for use with MATLAB code. 
