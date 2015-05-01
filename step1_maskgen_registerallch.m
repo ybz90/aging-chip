@@ -50,7 +50,7 @@ for imid = 0:imN-1 %assumes t starts at t0000
     % Morphologically open binary threshold image w/ structuring element
     % (2x100 rect); ignore features in thresh < 2x75 rect
     % NOTE: Consider using gpuArray to accelerate this step?
-    I1 = imopen(I0, strel('rectangle', [2, 75])); %changed from [2, 100]
+    I1 = imopen(I0, strel('rectangle', [2, 50])); %changed from [2, 100]; try [2, 75]?
     %figure, imshow(I1,[]); %debug
     I1_extend = imdilate(I1, strel('line',500,0)); %
     %figure, imshow(I1_extend,[]); %debug
@@ -70,7 +70,7 @@ for imid = 0:imN-1 %assumes t starts at t0000
 
     [Ia_lb,colN]= bwlabeln(Ia3);
 
-    %imid %debug
+    imid %debug
     center_xy = regionprops(center_blck, 'Centroid');
     column_xy = regionprops(Ia_lb, 'Centroid'); 
 

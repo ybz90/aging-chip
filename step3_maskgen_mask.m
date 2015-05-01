@@ -12,16 +12,19 @@
 clear all
 clock
 
-% Input the number of time frames for which to generate masks
-imN = input('Number of time frames: ');
 % Input the stitched position name (ie 2526)
 mergexy = int2str(input('Input composite xy name: '));
+
+% Input the number of time frames for which to generate masks
+imN = input('Number of time frames: ');
 
 % Create appropriate masks output directory (ie /masks/xy2526)
 mkdir(strcat('xy',mergexy,'/mask_raw'))
 
 
 for imid = 0:imN-1
+    
+    imid %debug
     
     % input directory and image paths for stitched nuc and thrsh images
     phase_name = ['xy',mergexy,'/thresh/xy',mergexy,'c1_pha_t',sprintf('%04g',imid),'.tif'];
@@ -104,7 +107,7 @@ for i=1:colN
      
      % fluor prop of the column
     fplist_clm = regionprops((I3_lb==i),Icf,'MeanIntensity','PixelIdxList'); 
-    Iflr_clm_th = otsuthresh(Icf, fplist_clm.PixelIdxList);
+    Iflr_clm_th = otsuthresh(Icf, fplist_clm.PixelIdxList); %calls otsu's thresholding algorithm function otsuthresh.m
     Iflr_clm_mask0 = bwareaopen(imfill(Icf>Iflr_clm_th, 4, 'holes'),10);
     Iflr_mask_out = imdilate(Iflr_clm_mask0, strel('disk',1));
     

@@ -8,7 +8,8 @@
  *    c) start, end = range of 'good' frames to keep; must be consistient across all positions, so 
  *       choose the lowest of all the positions
  *    d) reverse = 1 if stack needs to be vertically flipped so straps face "up", = 0 if no flip needed
- *    e) directory = working directory path for folder root
+ *    e) thrsh1, thrsh2 = lower and upper threshold limits
+ *    f) directory = working directory path for folder root
  * 
  * Macro function: 
  * 1) Make substack of frames in desired range for all 3 channel stacks
@@ -21,17 +22,35 @@
  * (optionally) Delete the artifacts above and below traps in the threshold stack
  */
 
+// TO DO: Import the variables from an external config .txt file, so this code will not have to be
+// edited by the end user. 
+
 
 
 //////////
 // Set variables
-xyarray = newArray("27");
-rotarray = newArray("-6.02"); 
-startarray = newArray("1");
-endarray = newArray("796");
-reversearray = newArray("1");
+xyarray = newArray(
+	"25",
+	"26",
+	"27"
+	);
+rotarray = newArray(
+	"-5.82",
+	"-5.42",
+	"-6.02"
+	); 
+start = 1; //choose latest start of all positions
+end = 796; //choose earliest end of all positions
+reversearray = newArray(
+	"1",
+	"1",
+	"1"
+	);
+thrsh1 = 0;
+thrsh2 = 1080;
 
-directory = "/Volumes/Data HD/Workspace/xy25-36/" //working directory
+directory = "/Volumes/Data HD/Workspace/xy25-36/"; //working directory
+//////////
 
 
 //////////
@@ -55,10 +74,11 @@ for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 		//print(myDir);
 	}
 }
+//////////
 
 
 //////////
-function processStacks(xy,rot,start,end,reverse,directory) {
+function processStacks(xy,rot,start,end,reverse,thrsh1,thrsh2,directory) {
 	//Process images for each of the four channel/raw subfolders, and export as stacks as well
 	//Phase
 	open(directory+"data/xy"+xy+"c1.tif"); //open file
@@ -73,10 +93,11 @@ function processStacks(xy,rot,start,end,reverse,directory) {
 	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/phase/raw/]"); 
 	
 	//Create threshold from phase
+	setAutoThreshold("Default");
 	//run("Threshold...");
-	setOption("BlackBackground", true);
-	run("Convert to Mask", "method=Default background=Dark calculate");
-	run("Invert", "stack");
+	setThreshold(thrsh1, thrsh2);
+	setOption("BlackBackground", false);
+	run("Convert to Mask", "method=Default background=Light");
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"c1_pha_t.tif");
 	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/thresh/raw/]"); 
 	
@@ -88,7 +109,7 @@ function processStacks(xy,rot,start,end,reverse,directory) {
 	if (reverse == 1) {
 		run("Flip Vertically", "stack");
 	}
-	run("Subtract Background...", "rolling=50 stack"); //substract background
+	run("Subtract Background...", "rolling=100 stack"); //substract background
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"c2_t.tif");
 	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/flu/raw/]"); 
 	
@@ -100,21 +121,24 @@ function processStacks(xy,rot,start,end,reverse,directory) {
 	if (reverse == 1) {
 		run("Flip Vertically", "stack");
 	}
-	run("Subtract Background...", "rolling=50 stack");
+	run("Subtract Background...", "rolling=100 stack");
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"c3_t.tif");
 	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/nuc/raw/]"); 
 	
 	//Close all windows
 	run("Close All");
 }
+//////////
 
 
+//////////
 // Run processStacks(xy,rot,start,end,reverse,directory) for all positions in xyarray
 for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 	xy = xyarray[i]; 
 	rot = parseFloat(rotarray[i]);
-	start = parseInt(startarray[i]);
-	end = parseInt(endarray[i]);
+	//start = parseInt(startarray[i]);
+	//end = parseInt(endarray[i]);
 	reverse = parseInt(reversearray[i]);
-	processStacks(xy,rot,start,end,reverse,directory);
+	processStacks(xy,rot,start,end,reverse,thrsh1,thrsh2,directory);
 }
+//////////

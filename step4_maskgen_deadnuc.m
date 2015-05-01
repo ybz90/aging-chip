@@ -34,6 +34,8 @@ mkdir(strcat('xy',mergexy,'/mask_clean_phase'))
 
 for imid = 0:imN-1
     
+    imid %debug
+    
     % input image names
     thrsh_name = ['xy',mergexy,'/thresh/xy',mergexy,'c1_pha_t',sprintf('%04g',imid),'.tif'];
     fluor_name = ['xy',mergexy,'/flu/xy',mergexy,'c2_t',sprintf('%04g',imid),'.tif'];
@@ -107,10 +109,8 @@ for imid = 0:imN-1
                 end
 
                 Imask = (Imask>0) - (Ic3>0) + (mask_lb>0);
-
             end
         end
-
     end
 
     Imask2 = bwareaopen((Imask>0), 14);
@@ -122,8 +122,6 @@ for imid = 0:imN-1
     
     I_out2 = I_ph + uint16(Imask2)*2000;
     imwrite(I_out2, save_name_c3ph)
-    
-    
 end
 
 clock
