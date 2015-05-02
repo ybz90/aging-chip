@@ -10,15 +10,14 @@
 
 % Input the position number to be registered; to align and account for
 % camera movement and drift
-pos = input('Input xy position: ');
-pos = int2str(pos);
+pos = int2str(input('Input xy position: '));
 
 % Input the number of frames (times) to be processed
 imN = input('Number of frames to process: ');
 
 % In the directories for each channel and threshold, make a new subfolder 
 % to store the registered files 
-for channels = {'phase','thresh','flu','nuc'}
+for channels = {'c1','c1_thr','c2','c3'}
     mkdir(strcat('xy',pos,'/',channels{1},'/reg'))
 end
 
@@ -28,16 +27,16 @@ for imid = 0:imN-1 %assumes t starts at t0000
     
     % Load the names and output dirs of the raw frames to be registered,
     % for the current time frame (imid)
-    thrsh_name = ['xy',pos,'/thresh/raw/xy',pos,'c1_pha_t',sprintf('%04g',imid),'.tif'];
-    phase_name = ['xy',pos,'/phase/raw/xy',pos,'c1_t',sprintf('%04g',imid),'.tif'];
-    fluor_name = ['xy',pos,'/flu/raw/xy',pos,'c2_t',sprintf('%04g',imid),'.tif'];
-    nuclr_name = ['xy',pos,'/nuc/raw/xy',pos,'c3_t',sprintf('%04g',imid),'.tif'];
+    thrsh_name = ['xy',pos,'/c1_thr/raw/xy',pos,'_c1_thr_t',sprintf('%04g',imid),'.tif'];
+    phase_name = ['xy',pos,'/c1/raw/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
+    fluor_name = ['xy',pos,'/c2/raw/xy',pos,'_c2_t',sprintf('%04g',imid),'.tif'];
+    nuclr_name = ['xy',pos,'/c3/raw/xy',pos,'_c3_t',sprintf('%04g',imid),'.tif'];
     
     % Set the names and output dirs of the registered frames for this imid
-    thrsh_name2 = ['xy',pos,'/thresh/reg/xy',pos,'c1_pha_A_t',sprintf('%04g',imid),'.tif'];
-    phase_name2 = ['xy',pos,'/phase/reg/xy',pos,'c1_A_t',sprintf('%04g',imid),'.tif'];
-    fluor_name2 = ['xy',pos,'/flu/reg/xy',pos,'c2_A_t',sprintf('%04g',imid),'.tif'];
-    nuclr_name2 = ['xy',pos,'/nuc/reg/xy',pos,'c3_A_t',sprintf('%04g',imid),'.tif'];
+    thrsh_name2 = ['xy',pos,'/c1_thr/reg/xy',pos,'_c1_thr_reg_t',sprintf('%04g',imid),'.tif'];
+    phase_name2 = ['xy',pos,'/c1/reg/xy',pos,'_c1_reg_t',sprintf('%04g',imid),'.tif'];
+    fluor_name2 = ['xy',pos,'/c2/reg/xy',pos,'_c2_reg_t',sprintf('%04g',imid),'.tif'];
+    nuclr_name2 = ['xy',pos,'/c3/reg/xy',pos,'_c3_reg_t',sprintf('%04g',imid),'.tif'];
     
     % Import the frame images corresponding to the loaded names
     I0 = imread(thrsh_name); % Thresholding (I0) is used for alignments

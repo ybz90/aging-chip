@@ -13,25 +13,25 @@ clear all
 clock
 
 % Input the stitched position name (ie 2526)
-mergexy = int2str(input('Input composite xy name: '));
+pos = int2str(input('Input xy position: '));
 
 % Input the number of time frames for which to generate masks
 imN = input('Number of time frames: ');
 
 % Create appropriate masks output directory (ie /masks/xy2526)
-mkdir(strcat('xy',mergexy,'/mask_raw'))
+mkdir(strcat('xy',pos,'/mask_raw'))
 
 
 for imid = 0:imN-1
     
-    imid %debug
+    % imid %debug
     
     % input directory and image paths for stitched nuc and thrsh images
-    phase_name = ['xy',mergexy,'/thresh/xy',mergexy,'c1_pha_t',sprintf('%04g',imid),'.tif'];
-    nuc_name = ['xy',mergexy,'/nuc/xy',mergexy,'c3_t',sprintf('%04g',imid),'.tif'];
+    phase_name = ['xy',pos,'/c1_thr/reg/xy',pos,'_c1_thr_reg_t',sprintf('%04g',imid),'.tif'];
+    nuc_name = ['xy',pos,'/c3/reg/xy',pos,'_c3_reg_t',sprintf('%04g',imid),'.tif'];
     
     % output directory and mask image name
-    save_name = ['xy',mergexy,'/mask_raw/ph_mask_raw_t',sprintf('%04g',imid),'.tif'];
+    save_name = ['xy',pos,'/mask_raw/xy',pos,'_mask_raw_t',sprintf('%04g',imid),'.tif'];
 
     
 I0 = imread(phase_name);
@@ -63,7 +63,7 @@ I3_a = (I3>0) - imdilate((I1_extend_lb==1),strel('rectangle',[2,100])); %changed
 I3_b = (I3_a>0);
 I3_c = bwareaopen(I3_b, 1500);
 
-[I3_lb colN ]= bwlabeln(I3_c);
+[I3_lb,colN]= bwlabeln(I3_c);
 
 Ia = I3.*I1_cnt;
 
@@ -142,7 +142,7 @@ for i=1:colN
     % two methods for connected cells:
     PAratio_nuc = propmx_f1(2,:).^2./propmx_f1(1,:)/4/pi;
     
-    [nouse clump_idx] = find(PAratio_nuc > 1.5); 
+    [nouse,clump_idx] = find(PAratio_nuc > 1.5); 
     
      
     if ~isempty(clump_idx)

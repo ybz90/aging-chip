@@ -21,15 +21,15 @@ clear all
 clock
 
 % Input the stitched position name (ie 2526)
-mergexy = int2str(input('xy name of mask to be cleaned: '));
+pos = int2str(input('Input xy name of mask to be cleaned: '));
 
 % Input the number of time frames for which to generate masks
 imN = input('Number of time frames: ');
 
 % Create output directories for cleaned mask images, and also overlayed
 % phase images
-mkdir(strcat('xy',mergexy,'/mask_clean'))
-mkdir(strcat('xy',mergexy,'/mask_clean_phase'))
+mkdir(strcat('xy',pos,'/mask_clean'))
+mkdir(strcat('xy',pos,'/mask_clean_phase'))
 
 
 for imid = 0:imN-1
@@ -37,15 +37,15 @@ for imid = 0:imN-1
     imid %debug
     
     % input image names
-    thrsh_name = ['xy',mergexy,'/thresh/xy',mergexy,'c1_pha_t',sprintf('%04g',imid),'.tif'];
-    fluor_name = ['xy',mergexy,'/flu/xy',mergexy,'c2_t',sprintf('%04g',imid),'.tif'];
-    ph_name = ['xy',mergexy,'/phase/xy',mergexy,'c1_t',sprintf('%04g',imid),'.tif'];
+    fluor_name = ['xy',pos,'/c2/reg/xy',pos,'_c2_reg_t',sprintf('%04g',imid),'.tif'];
+    ph_name = ['xy',pos,'/c1/reg/xy',pos,'_c1_reg_t',sprintf('%04g',imid),'.tif'];
+    thrsh_name = ['xy',pos,'/c1_thr/reg/xy',pos,'_c1_thr_reg_t',sprintf('%04g',imid),'.tif'];
     
-    mask_name = ['xy',mergexy,'/mask_raw/ph_mask_raw_t',sprintf('%04g',imid),'.tif'];
+    mask_name = ['xy',pos,'/mask_raw/xy',pos,'_mask_raw_t',sprintf('%04g',imid),'.tif'];
     
     % output image names    
-    save_name_mask = ['xy',mergexy,'/mask_clean/ph_mask_clean_t',sprintf('%04g',imid),'.tif'];
-    save_name_c3ph = ['xy',mergexy,'/mask_clean_phase/ph_mask_clean_phase_t',sprintf('%04g',imid),'.tif'];
+    save_name_mask = ['xy',pos,'/mask_clean/ph_mask_clean_t',sprintf('%04g',imid),'.tif'];
+    save_name_c3ph = ['xy',pos,'/mask_clean_phase/ph_mask_clean_phase_t',sprintf('%04g',imid),'.tif'];
     
     
     I0= imread(thrsh_name);
