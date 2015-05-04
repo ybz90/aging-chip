@@ -22,8 +22,6 @@ mkdir(strcat('xy',pos,'/mask_raw'))
 
 for imid = 0:imN-1
     
-    % imid %debug
-    
     % input directory and image paths for stitched nuc and thrsh images
     phase_name = ['xy',pos,'/c1_thr/reg/xy',pos,'_c1_thr_reg_t',sprintf('%04g',imid),'.tif'];
     nuc_name = ['xy',pos,'/c3/reg/xy',pos,'_c3_reg_t',sprintf('%04g',imid),'.tif'];
@@ -34,9 +32,12 @@ for imid = 0:imN-1
     I0 = imread(phase_name);
     Iflr = imread(nuc_name);
     
-
+    % initialize first frame
     if imid == 0
 
+        %
+        % morphologically open threshold image, remove small objects less
+        % than rect via rect struct element
         I1 = imopen(I0, strel('rectangle', [3, 100])); %changed from [5, 100]
 
         % possible that horizontal 
@@ -55,37 +56,47 @@ for imid = 0:imN-1
         I3_b = (I3_a>0);
         I3_c = bwareaopen(I3_b, 1500);
 
-        [I3_lb colN]= bwlabeln(I3_c);
+        % label each trap object as a column
+        [I3_lb,colN]= bwlabeln(I3_c);
+        
+        %figure; image(I3_c); %debug
 
         Columns = I3_lb;
     end
     
+    % initialize empty matrices of size ~ threshold image
     I_fulledge = zeros(size(I0));
     I_fillcell = I_fulledge;
 
     I_exm = I_fulledge;
     I_nuccell= I_fillcell;
-
+    
+    % init
     PAratio_nuc = cell(colN,1);
+    
+    fprintf('image %d has %d columns.\n', imid, colN); %debug
 
-        if colN ~= 21;
-            fprintf('image %d has %d columns.\n', imid, colN);
-        end
-
-    for i=1:colN
-
+    % for each column in the current frame
+    for i=1:colN 
+        
         curr_col = (Columns ==i);
-        Icf = double(Iflr).*curr_col;
+        Icf = double(Iflr).*curr_col; %double precision of nuc imread * current column
 
          % fluor prop of the column
         fplist_clm = regionprops(curr_col,Icf,'MeanIntensity','PixelIdxList'); 
-        Iflr_clm_th = otsuthresh(Icf, fplist_clm.PixelIdxList);
-        Iflr_clm_mask0 = bwareaopen(imfill(Icf>Iflr_clm_th, 4, 'holes'),10);
+        Iflr_clm_th = otsuthresh(Icf, fplist_clm.PixelIdxList); %otsu threshold current column nuc markers, calls otsuthresh.m
+        
+        %fill in holes between raw nuc image and otsu thresh; remove small objects less than 10px via area open
+        Iflr_clm_mask0 = bwareaopen(imfill(Icf>Iflr_clm_th, 4, 'holes'),10); 
+        %dilate mask with disk
         Iflr_mask_out = imdilate(Iflr_clm_mask0, strel('disk',1));
-
+        
+        %label objects (cells)
         [Iflr_lb0, flr_N]= bwlabel(Iflr_mask_out);
-
+        
+        %if no objects (cells) are found, erode column and try again
         thrsh_drop=0;
+        % NOTE NEED TO FIX THIS WHILE LOOP TO KICK OUT AFTER X # OF TRIES
         while flr_N==0
             thrsh_drop = thrsh_drop+1;
              temp_clm = curr_col;
@@ -99,15 +110,17 @@ for imid = 0:imN-1
             [Iflr_lb0, flr_N]= bwlabel(Iflr_mask_out);
 
         end
-
+        
+        % fluor prop of cells
         prop_f1 = regionprops(Iflr_lb0,Icf,'Area','MeanIntensity','Solidity','Perimeter');
 
-
+        % 
         if max([prop_f1.Area])>500
             Iflr_clm_mask0 = bwareaopen(imfill(Icf>1.1*Iflr_clm_th, 4, 'holes'),10);
             Iflr_mask_out = imdilate(Iflr_clm_mask0, strel('disk',1));
 
             Iflr_lb0= bwlabel(Iflr_mask_out);
+            %Iflr_lb0= logical(Iflr_mask_out);
             prop_f1 = regionprops(Iflr_lb0,Icf,'Area','MeanIntensity','Solidity','Perimeter');
         end
 
@@ -117,7 +130,7 @@ for imid = 0:imN-1
         if ~isempty(propmx_f1)
             % two methods for connected cells:
             PAratio_nuc = propmx_f1(2,:).^2./propmx_f1(1,:)/4/pi;
-            [nouse clump_idx] = find(PAratio_nuc > 1.5); 
+            [nouse,clump_idx] = find(PAratio_nuc > 1.5); 
 
             if ~isempty(clump_idx)
                 [PAratio_new, Iflr_mask2, Iflr_mask_label2] = de_clump_v2(Iflr_mask_out, Iflr_lb0, PAratio_nuc, clump_idx);

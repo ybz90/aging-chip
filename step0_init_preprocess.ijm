@@ -1,4 +1,7 @@
-/*  
+/* 
+ * ImageJ Macro for automatic image stack processing
+ * Yuan Zhao 05/04/2015
+ *  
  * Manual steps: 
  * 0) Place input image stacks in directory/data/ folder
  * 1) MANUALLY set the following variables
@@ -26,32 +29,28 @@
  * 
  */
 
-/*
- * Naming conventions for aging experiment: 
- * c1 = phase
- * c1_thr = threshold
- * c2 = fluor
- * c3 = nucl marker
- */
 
 ///////////////////
 // Set variables //
 xyarray = newArray(
 	"27"
+	//,"28","29","30","31","32","33","34","35","36"
 	);
 rotarray = newArray(
 	"-6.02"
+	//,"-5.653","-5.92","-5.47","-5.8","-5.49","-5.69","-5.36","-5.86","-5.7"
 	); 
 start = 1; //choose latest start frame of all positions
 end = 796; //choose earliest end frame of all positions
 reversearray = newArray(
 	"1"
+	//,"1","1","1","1","1","1","1","1","1"
 	);
 thrsh1 = 0;
 thrsh2 = 1100;
 
-//directory = "/Volumes/Data HD/Workspace/xy25-36/"; //working directory
-directory = "/Users/yuanz/Desktop/xy25-36/"; //working directory
+directory = "/Volumes/Data HD/Workspace/xy25-36/"; //working directory
+//directory = "/Users/yuanz/Desktop/xy25-36/"; //working directory
 
 // Define channel prefixes //
 phase_ch_prefix = "c1"; // phase channel
@@ -67,29 +66,28 @@ flu_ch_prefix = newArray( // array of fluorescent channels
 //cname prefix (ie c1, c1_thr, c2...)
 function processFlu(xy,rot,start,end,reverse,directory,cname) {
 	open(directory+"data/xy"+xy+cname+".tif");
-	run("Duplicate...", "duplicate");
+	//run("Duplicate...", "duplicate");
 	run("Make Substack...", " slices="+start+"-"+end);
 	run("Rotate... ", "angle=rot grid=1 interpolation=Bilinear stack");
 	if (reverse == 1) {
 		run("Flip Vertically", "stack");
 	}
 	run("Subtract Background...", "rolling=100 stack"); //substract background
-	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif");
-	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/"+cname+"/raw/]"); 
+	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif"); //save stack to xy_pos directory
+	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/"+cname+"/raw/]"); //export sequence of individual images to xy_pos/channel_type/raw for matlab code processing
 }
 
 
 //Function for processing phase images and creating/cleaning threshold files
 function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 	open(directory+"data/xy"+xy+cname+".tif"); //open file
-	run("Duplicate...", "duplicate");
+	//run("Duplicate...", "duplicate");
 	run("Make Substack...", " slices="+start+"-"+end); //make substack of desired frame range
 	run("Rotate... ", "angle=rot grid=1 interpolation=Bilinear stack"); // rotate substack
 	if (reverse == 1) {
 		run("Flip Vertically", "stack"); //if needed, flip the substack vertically
 	}
-	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif"); //save stack to xy_pos directory
-	//export sequence of individual images to xy_pos/channel_type/raw for matlab code processing
+	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif");
 	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/"+cname+"/raw/]"); 
 	
 	//Create threshold from phase
