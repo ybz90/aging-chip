@@ -37,9 +37,10 @@ for imid = 0:imN-1
     imid %debug
     
     % input image names
-    fluor_name = ['xy',pos,'/c2/reg/xy',pos,'_c2_reg_t',sprintf('%04g',imid),'.tif'];
     ph_name = ['xy',pos,'/c1/reg/xy',pos,'_c1_reg_t',sprintf('%04g',imid),'.tif'];
     thrsh_name = ['xy',pos,'/c1_thr/reg/xy',pos,'_c1_thr_reg_t',sprintf('%04g',imid),'.tif'];
+    
+    fluor_name = ['xy',pos,'/c2/reg/xy',pos,'_c2_reg_t',sprintf('%04g',imid),'.tif'];
     
     mask_name = ['xy',pos,'/mask_raw/xy',pos,'_mask_raw_t',sprintf('%04g',imid),'.tif'];
     

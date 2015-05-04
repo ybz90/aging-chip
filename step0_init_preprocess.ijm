@@ -50,14 +50,16 @@ reversearray = newArray(
 thrsh1 = 0;
 thrsh2 = 1100;
 
-directory = "/Volumes/Data HD/Workspace/xy25-36/"; //working directory
+//directory = "/Volumes/Data HD/Workspace/xy25-36/"; //working directory
+directory = "/Users/yuanz/Desktop/xy25-36/"; //working directory
 
-folders = newArray( //list of folders (one for each cname prefix/channel, plus one for threshold of phase)
-	"c1",
-	"c1_thr",
+// Define channel prefixes //
+phase_ch_prefix = "c1"; // phase channel
+flu_ch_prefix = newArray( // array of fluorescent channels
 	"c2",
 	"c3"
-	); 
+	);
+
 ///////////////////
 
 
@@ -140,6 +142,9 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 
 ///////////////////
 // Initialize empty xy_pos/channel/raw folders
+ph_thrsh_prefix = newArray(phase_ch_prefix,phase_ch_prefix+"_thr"); // add _thr to phase channel prefix for threshold prefix
+folders = Array.concat(ph_thrsh_prefix,flu_ch_prefix); //concat ph, thrsh prefixes with flu channel prefixes; use this array for folder names
+//Array.print(folders);
 for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 	xy = xyarray[i]; 
 	myDir1 = directory+"xy"+xy; //make xy_pos folders
@@ -162,11 +167,13 @@ for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 	reverse = parseInt(reversearray[i]);
 
 	// Phase channel; exports processed phase and threshold
-	processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,"c1");
+	processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,phase_ch_prefix);
 
 	// Fluorescent channels
-	processFlu(xy,rot,start,end,reverse,directory,"c2"); //Flu
-	processFlu(xy,rot,start,end,reverse,directory,"c3"); //Nuclear Marker
+	for (j = 0; i<flu_ch_prefix.length; i++) { //for every flu channel in flu_ch_prefix array
+		curr_flu = flu_ch_prefix[j];
+		processFlu(xy,rot,start,end,reverse,directory,curr_flu);
+	}
 	
 	run("Close All"); //Close all windows
 }
