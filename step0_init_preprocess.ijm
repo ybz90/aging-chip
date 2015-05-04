@@ -170,7 +170,7 @@ for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 	processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,phase_ch_prefix);
 
 	// Fluorescent channels
-	for (j = 0; i<flu_ch_prefix.length; i++) { //for every flu channel in flu_ch_prefix array
+	for (j = 0; j<flu_ch_prefix.length; j++) { //for every flu channel in flu_ch_prefix array
 		curr_flu = flu_ch_prefix[j];
 		processFlu(xy,rot,start,end,reverse,directory,curr_flu);
 	}
