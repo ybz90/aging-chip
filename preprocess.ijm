@@ -74,7 +74,7 @@ function processFlu(xy,rot,start,end,reverse,directory,cname) {
 	}
 	run("Subtract Background...", "rolling=100 stack"); //substract background
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif"); //save stack to xy_pos directory
-	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/"+cname+"/raw/]"); //export sequence of individual images to xy_pos/channel_type/raw for matlab code processing
+	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"/]"); //export sequence of individual images to xy_pos/channel_type/raw for matlab code processing
 }
 
 
@@ -88,7 +88,7 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 		run("Flip Vertically", "stack"); //if needed, flip the substack vertically
 	}
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif");
-	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/"+cname+"/raw/]"); 
+	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"/]"); 
 	
 	//Create threshold from phase
 	setAutoThreshold("Default");
@@ -131,7 +131,7 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 		run("Fill", "stack");
 	}
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_thr_t.tif");
-	run("Image Sequence... ", "format=TIFF save=["+directory+"/xy"+xy+"/"+cname+"_thr/raw/]"); 
+	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"_thr/]"); 
 	selectWindow("Results");
 	run("Close");	
 }
@@ -152,9 +152,6 @@ for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 		//make a subfolder 
 		myDir2 = directory+"xy"+xy+"/"+subf;
 		File.makeDirectory(myDir2);
-		//make a /raw/ subfolder in first subfolder
-		myDir3 = directory+"xy"+xy+"/"+subf+"/raw"; 
-		File.makeDirectory(myDir3);
 	}
 }
 
