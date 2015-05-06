@@ -33,14 +33,16 @@ function autotrack_columns_trajdata_simple_v1(imN, pos, colN, flrn)
         end
 
 
-        mask_name = ['xy',pos,'/mask/xy',pos,'ph_mask_raw_t',sprintf('%04g',imid),'.tif'];
+        mask_name = ['xy',pos,'/mask/xy',pos,'_mask_t',sprintf('%04g',imid),'.tif'];
 
         I0= imread(prephase_name);
+
         for fk=1:flrn
             Iflr{fk} = imread(fluor_name{fk});
         end
 
         Imask = imread(mask_name);
+        %figure; imagesc(Imask) %debug
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
