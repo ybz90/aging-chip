@@ -1,37 +1,33 @@
 function register_frames(pos,imN)
 
     % register_frames.m is used to register the positions of each trap across the frames to account for movement in the stage in the form of shaking or drifting over time.
-    % This function is an OPTIONAL step before mask generation and cell trajectory tracking and need not be used if the stage is stable throughout the course of the expeirment.
+    % This function is an OPTIONAL step before mask generation and cell trajectory tracking and need not be used if the stage is stable throughout the course of the experiment.
 
     % Original code by Meng Jin; last edited by Yuan Zhao 05/05/15
 
 
-    % For every frame/timepoint
-    for imid = 0:imN-1 %assumes t starts at t0000
+    for imid = 1:imN
 
-        % Load the names and output dirs of the raw frames to be registered,
-        % for the current time frame (imid)
+        fprintf('Registering frame number %d.\n', imid); %debug
+
+        % Load the names and output dirs of the raw frames to be registered, for the current time frame (imid)
         % write output to the same path as input, overwriting raw images
         thrsh_name = ['xy',pos,'/c1_thr/xy',pos,'_c1_thr_t',sprintf('%04g',imid),'.tif'];
+        I0 = imread(thrsh_name);
+
         phase_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
+        Iph = imread(phase_name);
+
         fluor_name = ['xy',pos,'/c2/xy',pos,'_c2_t',sprintf('%04g',imid),'.tif'];
-        nuclr_name = ['xy',pos,'/c3/xy',pos,'_c3_t',sprintf('%04g',imid),'.tif'];
-
-        % Import the frame images corresponding to the loaded names
-        I0 = imread(thrsh_name); % Thresholding (I0) is used for alignments
-        %figure, image(I0) %debug
-
-        Iph = imread(phase_name); % Import phase, fluorescence, and nuclear so these images may also be registered
         Iflr = imread(fluor_name);
+
+        nuclr_name = ['xy',pos,'/c3/xy',pos,'_c3_t',sprintf('%04g',imid),'.tif'];
         Inuc = imread(nuclr_name);
 
-        % Morphologically open binary threshold image w/ structuring element
-        % (2x100 rect); ignore features in thresh < 2x75 rect
-        % NOTE: Consider using gpuArray to accelerate this step?
+
         I1 = imopen(I0, strel('rectangle', [2, 50])); %changed from [2, 100]; try [2, 75]?
-        %figure, imshow(I1,[]); %debug
-        I1_extend = imdilate(I1, strel('line',500,0)); %
-        %figure, imshow(I1_extend,[]); %debug
+        I1_extend = imdilate(I1, strel('line',500,0));
+
         % Label connected components in dilated image; after removing small objects
         I1_lb = bwlabel(bwareaopen((I1_extend==0),5000));
         center_blck = (I1_lb==2);
@@ -48,15 +44,14 @@ function register_frames(pos,imN)
 
         [Ia_lb,colN]= bwlabeln(Ia3);
 
-        imid %debug
         center_xy = regionprops(center_blck, 'Centroid');
         column_xy = regionprops(Ia_lb, 'Centroid');
 
         columnN = length(column_xy);
         curr_xy = round([column_xy(1).Centroid(1), center_xy.Centroid(2)]);
 
-        % For first image, set as the current position
-        if imid == 0
+        % Initialize first frame, set initial position
+        if imid == 1
             use_refxy = curr_xy;
 
             Imask_new = I0;
@@ -64,7 +59,7 @@ function register_frames(pos,imN)
             Inuc_new = Inuc;
             Iph_new  = Iph;
 
-        % Update positions and shift  flu, nuc, and phase images
+        % Update positions and shift flu, nuc, phase, and threshold images to align
         else
             d_xy = curr_xy - use_refxy;
             d_col = d_xy(1);
@@ -107,6 +102,4 @@ function register_frames(pos,imN)
         imwrite(Inuc_new, nuclr_name);
         imwrite(Iph_new, phase_name);
     end
-
-    %clock
 end

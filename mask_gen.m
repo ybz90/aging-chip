@@ -2,25 +2,36 @@ function mask_gen(pos,imN)
 
     % mask_gen.m is used to generate a mask from the treshold and nuclear marker images. The threshold is used to determine the traps as columns, and within each one, the nuclear marker is segmented and dilated.
     % EdgeID is based on the MeanIntensity of the cell region.
+    % Finally, the masks are cleaned and non-cell and dead cell objects are removed by comparing the masks to a fluorescent channel background.
+    % (OPTIONAL) Export cleaned masks and mask+phase overlay images.
 
     % Original code by Meng Jin; last edited by Yuan Zhao 05/05/15
 
+    % TO DO: INCLUDE CLEANING CODE FOR REMOVING NON CIRCULAR OBJECTS, ETC.
+
 
     % Create appropriate masks output directory (ie /masks/xy2526)
-    mkdir(strcat('xy',pos,'/mask_raw'))
+    mkdir(strcat('xy',pos,'/mask'))
+    % Create output directory for mask overlaid atop phase images
+    mkdir(strcat('xy',pos,'/mask_overlay'))
 
 
     for imid = 1:imN
 
         % input directory and image paths for stitched nuc and thrsh images
-        phase_name = ['xy',pos,'/c1_thr/xy',pos,'_c1_thr_t',sprintf('%04g',imid),'.tif'];
+        ph_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
+        I_ph = imread(ph_name);
+
+        thrsh_name = ['xy',pos,'/c1_thr/xy',pos,'_c1_thr_t',sprintf('%04g',imid),'.tif'];
+        I0 = imread(thrsh_name);
+
         nuc_name = ['xy',pos,'/c3/xy',pos,'_c3_t',sprintf('%04g',imid),'.tif'];
+        Iflr = imread(nuc_name);
 
         % output directory and mask image name
-        save_name = ['xy',pos,'/mask_raw/xy',pos,'_mask_raw_t',sprintf('%04g',imid),'.tif'];
+        save_name = ['xy',pos,'/mask/xy',pos,'_mask_t',sprintf('%04g',imid),'.tif'];
+        save_name_c3ph = ['xy',pos,'/mask_overlay/xy',pos,'_mask_overlay_t',sprintf('%04g',imid),'.tif'];
 
-        I0 = imread(phase_name);
-        Iflr = imread(nuc_name);
 
         % initialize first frame
         if imid == 1
@@ -44,11 +55,10 @@ function mask_gen(pos,imN)
             I3_a = (I3>0) - imdilate((I1_extend_lb==1),strel('rectangle',[2,100]));
             I3_b = (I3_a>0);
             I3_c = bwareaopen(I3_b, 1500);
-
-            % label each trap object as a column
-            [I3_lb,colN]= bwlabeln(I3_c);
-
             %figure; image(I3_c); %debug
+
+            % label each trap object as a column [label matrix, num components]
+            [I3_lb,colN]= bwlabeln(I3_c);
 
             Columns = I3_lb;
         end
@@ -63,7 +73,7 @@ function mask_gen(pos,imN)
         % init
         PAratio_nuc = cell(colN,1);
 
-        fprintf('image %d has %d columns.\n', imid, colN); %debug
+        fprintf('Generating mask. Frame number %d has %d columns.\n', imid, colN); %debug
 
         % for each column in the current frame
         for i=1:colN
@@ -118,10 +128,12 @@ function mask_gen(pos,imN)
             I_nuccell = I_nuccell + Iflr_mask_out;
         end
 
-    % figure; imagesc(I_nuccell)
-
         Iout = uint8((I_nuccell>0)*255);
         imwrite(Iout, save_name)
+        figure; imagesc(Iout)
+
+        I_out2 = I_ph + uint16(I_nuccell)*2000;
+        imwrite(I_out2, save_name_c3ph)
     end
     %clock
 

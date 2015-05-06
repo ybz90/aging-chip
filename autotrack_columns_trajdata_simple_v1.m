@@ -16,6 +16,7 @@ function autotrack_columns_trajdata_simple_v1(imN, pos, colN, flrn)
     % % or 'output_xy123.mat' for combined positions xy01, xy02, xy03
 
 
+    % inialize empty 3D matrix to score trajectories (frame #, # flu channels, trap #)
     Traj = zeros(imN, flrn, colN);
 
 
@@ -23,7 +24,7 @@ function autotrack_columns_trajdata_simple_v1(imN, pos, colN, flrn)
     fluor_name = cell(1, flrn);
     Iflr = cell(1, flrn);
 
-    for imid =1:imN
+    for imid = 1:imN
 
         % get input image names
         prephase_name =['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif']; %c1
