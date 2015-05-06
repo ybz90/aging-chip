@@ -1,12 +1,9 @@
 function register_frames(pos,imN)
 
-    % Register all frames' positions in all 3 channels using the threshold image of the
-    % phase channel; the purpose of this code is to align all the frames to
-    % correct for drift and other movement over time
+    % register_frames.m is used to register the positions of each trap across the frames to account for movement in the stage in the form of shaking or drifting over time.
+    % This function is an OPTIONAL step before mask generation and cell trajectory tracking and need not be used if the stage is stable throughout the course of the expeirment.
 
-    % Run this code on all positions pre-processed by ImageJ macro
-
-    % Original code by Meng Jin; last edited by Yuan Zhao
+    % Original code by Meng Jin; last edited by Yuan Zhao 05/05/15
 
 
     % For every frame/timepoint
@@ -44,16 +41,16 @@ function register_frames(pos,imN)
         I3 = imdilate(I2, strel('rectangle',[100, 15]));
         Ia = I3.*I1_cnt;
 
-        Ia1 = imdilate(Ia, strel('disk',6)); 
+        Ia1 = imdilate(Ia, strel('disk',6));
         Ia2 = imfill(Ia1, 'holes');
         % Remove any non-column features
-        Ia3 = bwareaopen(Ia2, 1000); 
+        Ia3 = bwareaopen(Ia2, 1000);
 
         [Ia_lb,colN]= bwlabeln(Ia3);
 
         imid %debug
         center_xy = regionprops(center_blck, 'Centroid');
-        column_xy = regionprops(Ia_lb, 'Centroid'); 
+        column_xy = regionprops(Ia_lb, 'Centroid');
 
         columnN = length(column_xy);
         curr_xy = round([column_xy(1).Centroid(1), center_xy.Centroid(2)]);
@@ -77,7 +74,7 @@ function register_frames(pos,imN)
             Iflr_new = Iph_new;
             Inuc_new = Iph_new;
 
-            Imask_new = uint8(zeros(size(I0))); 
+            Imask_new = uint8(zeros(size(I0)));
 
             COL = size(I0,2);
             ROW = size(I0,1);
@@ -87,18 +84,18 @@ function register_frames(pos,imN)
                 curr_col= d_col+1:COL;
             else
                 new_col= -d_col+1:COL;
-                curr_col= 1:COL + d_col;    
+                curr_col= 1:COL + d_col;
             end
 
             if d_row >0
                  new_row= 1:ROW - d_row;
                  curr_row = d_row+1:ROW;
             else
-                new_row = -d_row+1:ROW; 
+                new_row = -d_row+1:ROW;
                 curr_row =1: ROW + d_row;
             end
 
-            Imask_new(new_row, new_col) = I0(curr_row, curr_col);    
+            Imask_new(new_row, new_col) = I0(curr_row, curr_col);
             Iflr_new(new_row, new_col) = Iflr(curr_row, curr_col);
             Inuc_new(new_row, new_col) = Inuc(curr_row, curr_col);
             Iph_new(new_row, new_col) = Iph(curr_row, curr_col);
@@ -108,7 +105,7 @@ function register_frames(pos,imN)
         imwrite(Imask_new, thrsh_name);
         imwrite(Iflr_new, fluor_name);
         imwrite(Inuc_new, nuclr_name);
-        imwrite(Iph_new, phase_name);      
+        imwrite(Iph_new, phase_name);
     end
 
     %clock

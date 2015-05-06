@@ -1,22 +1,9 @@
 function mask_clean(pos,imN)
 
-    % Removes non-cell or dead-cell (based on flu) masks from step 3, based on
-    % on the cytosolic fluorescent channel images. Exports the clean masks from
-    % the raw mask input, as well as the cleaned mask overlayed on top of phase
-    % channel images. 
+    % mask_clean.m is used to further clean the previously generated masks, using a cytosolic fluorescent channel to remove dead cells and non-cell debris/artifacts. This function will export the further cleaned masks and export an image of it overlayed on top of the phase images.
 
-    % Original code by Meng Jin; last edited by Yuan Zhao
+    % Original code by Meng Jin; last edited by Yuan Zhao 05/05/15
 
-
-    % NOTE: Potential additions to the code: (1) as part of mask cleaning, remove
-    % non-circular objects based on circularity and also below and above a
-    % certain radius/total area; (2) change/increase the area of generated cell
-    % masks to improve quantification, though this may not be that important. 
-
-    % Another issue I noticed is that if the nuclear marker is too dim,
-    % a cell may be ignored on the mask even if it is the first in the trap.
-    % Relatedly, some cells may not express nuclear marker even though it is
-    % lower in the trap.
 
     % Create output directories for cleaned mask images, and also overlayed
     % phase images
@@ -36,7 +23,7 @@ function mask_clean(pos,imN)
 
         mask_name = ['xy',pos,'/mask_raw/xy',pos,'_mask_raw_t',sprintf('%04g',imid),'.tif'];
 
-        % output image names    
+        % output image names
         save_name_mask = ['xy',pos,'/mask_clean/xy',pos,'ph_mask_clean_t',sprintf('%04g',imid),'.tif'];
         save_name_c3ph = ['xy',pos,'/mask_clean_phase/xy',pos,'ph_mask_clean_phase_t',sprintf('%04g',imid),'.tif'];
 
@@ -51,7 +38,7 @@ function mask_clean(pos,imN)
 
             I1 = imopen(I0, strel('rectangle', [5, 100]));
 
-            % possible that horizontal 
+            % possible that horizontal
             I1_extend = imdilate(I1, strel('line',400,0));
             I1_extend_lb = bwlabel(I1_extend);
             I1_lb = bwlabel(bwareaopen((I1_extend==0),5000));

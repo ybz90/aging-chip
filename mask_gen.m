@@ -1,12 +1,9 @@
 function mask_gen(pos,imN)
 
-    % Mask generation code to generate masks from registered images
+    % mask_gen.m is used to generate a mask from the treshold and nuclear marker images. The threshold is used to determine the traps as columns, and within each one, the nuclear marker is segmented and dilated.
+    % EdgeID is based on the MeanIntensity of the cell region.
 
-    % based on v6; in v6, edgeid is based on MeanIntensity of cell region.
-    % in v7, considering glu 0.02 when cells are more ellipsoid like shapes.
-    % and connected
-
-    % Original code by Meng Jin; last edited by Yuan Zhao
+    % Original code by Meng Jin; last edited by Yuan Zhao 05/05/15
 
 
     % Create appropriate masks output directory (ie /masks/xy2526)
@@ -32,7 +29,7 @@ function mask_gen(pos,imN)
             % than rect via rect struct element
             I1 = imopen(I0, strel('rectangle', [5, 100]));
 
-            % possible that horizontal 
+            % possible that horizontal
             I1_extend = imdilate(I1, strel('line',400,0));
             I1_extend_lb = bwlabel(I1_extend);
             I1_lb = bwlabel(bwareaopen((I1_extend==0),5000));
@@ -69,17 +66,17 @@ function mask_gen(pos,imN)
         fprintf('image %d has %d columns.\n', imid, colN); %debug
 
         % for each column in the current frame
-        for i=1:colN 
+        for i=1:colN
 
             curr_col = (Columns ==i);
             Icf = double(Iflr).*curr_col; %double precision of nuc imread * current column
 
              % fluor prop of the column
-            fplist_clm = regionprops(curr_col,Icf,'MeanIntensity','PixelIdxList'); 
+            fplist_clm = regionprops(curr_col,Icf,'MeanIntensity','PixelIdxList');
             Iflr_clm_th = otsuthresh(Icf, fplist_clm.PixelIdxList); %otsu threshold current column nuc markers, calls otsuthresh.m
 
             %fill in holes between raw nuc image and otsu thresh; remove small objects less than 10px via area open
-            Iflr_clm_mask0 = bwareaopen(imfill(Icf>Iflr_clm_th, 4, 'holes'),10); 
+            Iflr_clm_mask0 = bwareaopen(imfill(Icf>Iflr_clm_th, 4, 'holes'),10);
             %dilate mask with disk
             Iflr_mask_out = imdilate(Iflr_clm_mask0, strel('disk',1));
 
@@ -93,7 +90,7 @@ function mask_gen(pos,imN)
                  temp_clm = curr_col;
                  column= imerode(temp_clm, strel('rectangle',[5,1]));
                  Icf = double(Iflr).*double(column);
-                 fplist_clm = regionprops(curr_col,Icf,'MeanIntensity','PixelIdxList'); 
+                 fplist_clm = regionprops(curr_col,Icf,'MeanIntensity','PixelIdxList');
                 Iflr_clm_th = otsuthresh(Icf, fplist_clm.PixelIdxList);
                 Iflr_clm_mask0 = bwareaopen(imfill(Icf>(1-0.1*thrsh_drop)*Iflr_clm_th, 4, 'holes'),10);
                 Iflr_mask_out = imdilate(Iflr_clm_mask0, strel('disk',1));
@@ -110,7 +107,7 @@ function mask_gen(pos,imN)
             if ~isempty(propmx_f1)
                 % two methods for connected cells:
                 PAratio_nuc = propmx_f1(2,:).^2./propmx_f1(1,:)/4/pi;
-                [nouse,clump_idx] = find(PAratio_nuc > 1.5); 
+                [nouse,clump_idx] = find(PAratio_nuc > 1.5);
 
                 if ~isempty(clump_idx)
                     [PAratio_new, Iflr_mask2, Iflr_mask_label2] = de_clump_v2(Iflr_mask_out, Iflr_lb0, PAratio_nuc, clump_idx);
