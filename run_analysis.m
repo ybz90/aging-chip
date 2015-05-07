@@ -50,3 +50,8 @@ for i = 1:posn
 end
 
 %
+%% VISUALIZATION & ANALYSIS
+
+plot_data()
+
+
