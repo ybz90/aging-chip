@@ -1,4 +1,5 @@
-%% INPUT CONFIGURATION
+%% Pipeline wrapper for aging chip code
+% Yuan Zhao 05/06/2015
 
 % Input the position number to be registered; to align and account for
 % camera movement and drift
@@ -20,15 +21,9 @@ fprintf('Processing %d frames for position xy %d.\n', imN, str2num(pos));
 register_frames(pos,imN)
 
 %
-%% GENERATE MASKS FROM NUCLEAR MARKER
+%% GENERATE MASKS AND CELL TRAJECTORIES
 
-mask_gen(pos,imN,7)
-
-%
-%% TRAJECTORIES
-% NOTE: VERIFY MENG'S CODE FOR NOW, GET SOME TRAJECTORIES. THINK OF BETTER WAYS TO IMPLEMENT THIS CODE. ALWAYS EXPORT THIS DATA .MAT BUT KEEP IN MEM TOO FOR LATER ANALYSIS? MAYBE JUST REIMPORT TO BE SAFE IF MULTIPEL ANALYSIS SCRIPTS ARE RUN
-
-autotrack_columns_trajdata_simple_v1(imN,pos,7,2)
+mask_traj(pos,imN,7,2)
 
 %
 %% FURTHER ANALYSIS
