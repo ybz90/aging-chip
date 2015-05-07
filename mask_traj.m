@@ -24,7 +24,7 @@ function mask_traj(pos,imN,colN,fluN)
 
     % For each frame...
     for imid = 1:imN
-        fprintf('Generating mask and trajectories. Frame number %d has %d columns.\n', imid, colN); %debug
+        fprintf('Frame number %d has %d columns.\n', imid, colN); %debug
 
         % Input directory and image paths for nuclear marker, fluorescence, and phase channel images
         ph_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
