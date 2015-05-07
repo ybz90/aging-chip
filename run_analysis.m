@@ -22,7 +22,7 @@ register_frames(pos,imN)
 %
 %% GENERATE MASKS FROM NUCLEAR MARKER
 
-mask_gen(pos,imN)
+mask_gen(pos,imN,7)
 
 %
 %% TRAJECTORIES
