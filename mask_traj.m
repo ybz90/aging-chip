@@ -17,7 +17,7 @@ function mask_traj(pos,imN,colN,fluN)
     % Initialize empty 3D matrix to store trajectories (frame #, trap #, flu channel #)
     traj = zeros(imN, colN, fluN);
     % Output trajectory data for all traps on this xy position
-    output_data =['xy',pos,'/xy',pos,'_traj_DATE.mat']; %include position and date in the filename
+    output_data =['xy',pos,'/xy',pos,'_traj.mat']; %include position and date in the filename
 
     % Define column slice width as the image width divided by colN
     block = round(512/colN);
@@ -56,15 +56,29 @@ function mask_traj(pos,imN,colN,fluN)
 
             % Otsu's threshold nuclear marker image to obtain binary column mask
             %[level EM] = graythresh(Icf);
-            BW = im2bw(Icf,0.05);
+            level = 0.05;
+            BW = im2bw(Icf,level);
             BW2 = imfill(BW,'holes');
             BW3 = imdilate(BW2, strel('disk',1)); %dilate mask with disk
             %figure; imshow(BW3) %debug
 
-            % ADD CODE TO CHECK IF THERE ANY CELLS AT ALL; IGNORE TRAP IF NONE FOUND
+            mask_prop = regionprops(BW3,Icf,'Area'); %areas of the cell masks
+            areas = [mask_prop(:).Area];
 
-            % IMPLEMENT CODE FOR DECUMPLING CONNECTED CELLS AS WELL AS REMOVING ON CIRCULAR CELLS; this is unimportant if the lower-most cell is unaffected by these kind of mask segmentation issues
+            % If the cell masks are too small, reduce the threshold level to incrase mask size
+            num_tries = 0;
+            while length(areas) ~= 0 && min(areas) < 30 && max(areas) < 100 && num_tries < 3 %while there are cells identified, and there are cells below area = 30 but not above area = 100, and the number of re-threshold attempts is <3
+            % NOTE: Another approach might be to look at the mother cell and dilate only if the mother cell is too small, improving accuracy of the important features of the mask.
+                level = level-0.01;
+                num_tries = num_tries + 1;
+                BW = im2bw(Icf,level); %repeat Otsu's threshold with new paramaters
+                BW2 = imfill(BW,'holes');
+                BW3 = imdilate(BW2, strel('disk',1));
+                mask_prop = regionprops(BW3,Icf,'Area');
+                areas = [mask_prop(:).Area];
+            end
 
+            %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios.
 
             % Add current column mask to the overall mask image for output
             I_nuc_mask = horzcat(I_nuc_mask,BW3);
@@ -75,7 +89,7 @@ function mask_traj(pos,imN,colN,fluN)
                 I_flu_col = curr_I_flu(:,1+(i-1)*block:i*block);
 
                 % Determine the properties of the segmented cells using regionprops(BW_image,Intensity_Image,Properties)
-                col_prop = regionprops(BW3,I_flu_col,'Area','MeanIntensity','Centroid','MajorAxisLength', 'MinorAxisLength');
+                col_prop = regionprops(BW3,I_flu_col,'MeanIntensity','Centroid');
 
                 % Get centroids of all cells and their x,y coordinates
                 all_centroids = [col_prop(:).Centroid];
@@ -84,7 +98,7 @@ function mask_traj(pos,imN,colN,fluN)
 
                 % Structure for holding the cell fluorescence and other property data for all cells
                 % col_prop_2 has dimensions of 4 rows (cell properties) x n cols (# of cells in the trap)
-                col_prop_2 = [col_prop(:).Area; col_prop(:).MeanIntensity; x_centroids; y_centroids];
+                col_prop_2 = [col_prop(:).MeanIntensity; x_centroids; y_centroids];
                 %fprintf('Column #%d has %d cells.\n', i, length(col_prop_2(:))/4); %debug
 
                 % The centroid with the highest y-coordinate value is the cell that is lowest in the trap, aka the mother cell; its index, idx, specifies the column in col_prop_2 that stores its properties
@@ -94,7 +108,11 @@ function mask_traj(pos,imN,colN,fluN)
                 mother_prop = col_prop_2(:,idx);
 
                 % Store mother cell fluorescence in trajectories matrix
-                traj(imid,i,y) = mother_prop(2);
+                if numel(mother_prop) == 0 %if no cells are present in the trap
+                    traj(imid,i,y) = 0; %store 0 as the fluorescence
+                else
+                    traj(imid,i,y) = mother_prop(1);
+                end
             end
         end
 
@@ -103,9 +121,9 @@ function mask_traj(pos,imN,colN,fluN)
         %figure; imshow(I_nuc_mask)
 
         % Output mask+phase overlay
-        C = imfuse(I_nuc_mask,I_ph,'falsecolor','Scaling','joint','ColorChannels',[1 2 0]);
-        imwrite(C, out_name_overlay)
-        %figure; imshow(C)
+        I_overlay = imfuse(I_ph,I_nuc_mask,'falsecolor','ColorChannels','red-cyan');
+        %figure; imshow(I_overlay)
+        imwrite(I_overlay, out_name_overlay)
     end
 
     % Write trajectory data to output_data

@@ -1,8 +1,10 @@
 %% Pipeline wrapper for aging chip code
 % Yuan Zhao 05/06/2015
 
-% Input the position number to be registered; to align and account for
-% camera movement and drift
+% Add scripts folder to search path
+addpath('/Users/yuanz/Git/aging-chip');
+
+% Input the position numbers to be analyzed
 pos = int2str(input('Input xy position: '));
 
 % Automatically scan phase folder for the input position to determine the total # of frames
@@ -23,8 +25,9 @@ register_frames(pos,imN)
 %
 %% GENERATE MASKS AND CELL TRAJECTORIES
 
-mask_traj(pos,imN,7,2)
+% Input the number of traps per image
+%colN = int2str(input('Input trap #: '));
+% Input the number of fluorescent channels to analyze
+%fluN = int2str(input('Input # of fluorescent channels: '));
 
-%
-%% FURTHER ANALYSIS
-% put function(s) for plotting and analysis here so the data
+mask_traj(pos,imN,colN,fluN)
