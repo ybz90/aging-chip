@@ -33,11 +33,9 @@ function plot_data_single
         % Import manually curated lifespan data for each cell in each position
         % Add lifespan data to all_lifespan 1 x (num pos) cell array, where each lifespan data array has dim:
         % # of cells rows x 3 cols (cell #, lifespan start frame, lifespan end frame)
-        % NOTE: Once Whi5 reporter is integrated, cell cycle data can be automated; for now, this too must be added manually
         lifespan_file = csvread(['xy',pos,'/xy',pos,'_lifespan.txt']);
         all_lifespan{i} = lifespan_file;
     end
-
 
     % Figure for containing subplots of traces for each cell
     figure;
@@ -49,7 +47,7 @@ function plot_data_single
 
         % Frames across which the current cell is alive, from manual curation of movies
         lifespan = all_lifespan{q+1}(r+1,3);
-        X = all_lifespan{q+1}(r+1,2):lifespan; %all_lifespan(r+1,2):all_lifespan(r+1,3); % SET TO EXACT LIFE BASED ON MANUAL CHECKING; WE CAN MAP TO THAT # BY LOOKING AT POSITION XY AND 1-7 CELL/COLN;
+        X = all_lifespan{q+1}(r+1,2):lifespan;
 
         % Initialize current subplot
         gridcol = 4; % four subplots per row
@@ -68,8 +66,16 @@ function plot_data_single
         ylabel(ax1,'GFP');
         cell_title = ['Position ',char(pos_ID),'; Cell # ',char(cell_no),'; Lifespan: ',num2str(lifespan)];
         title(cell_title);
+        hold on
 
-        % hold on
+        % Get the cell cycle data from the lifespan file
+        % NOTE: Once Whi5 reporter is integrated, cell cycle data can be automated; for now, this too must be added manually
+        cycles = all_lifespan{q+1}(r+1,4:end);
+        y1 = get(gca,'ylim'); % height of cell cycle bar
+        for k = cycles
+            line([k k],y1,'Color','k')
+        end
+
         % % Plot every other fluorescent channel...
         % for flu = 2:sz(3)
         %     % Add axis for current flu channel
