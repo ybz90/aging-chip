@@ -38,7 +38,7 @@ function plot_data_all
     % Figure containing composite of traces for all cells
     figure;
     % For every cell in all_traj...
-    for j = 1:12%sz(2)
+    for j = 1:10%sz(2)
         [q,r] = quorem(sym(j-1),sym(colN));
         pos_ID = ['xy',num2str(positions(q+1))]; % quotient of (cell # in all_traj - 1) and (colN per position) + 1 gives index in (positions) of this cell's original xy position ID
         cell_no = r+1; % remainder of (cell # in all_traj - 1) and (colN per position) gives the cell # out of 7 of this cell in its original xy; where r = 0 is cell #1

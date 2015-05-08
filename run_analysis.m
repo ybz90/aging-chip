@@ -8,7 +8,7 @@ addpath('/Users/yuanz/Git/aging-chip');
 pos_input = input('xy positions to analyze {01, 02, ..., 99}: ');
 
 % Convert input positions from ints to strs
-pos = {};
+pos = cell(1,numel(pos_input));
 for k = 1:length(pos_input) % for each position input
     pos{k} = int2str(pos_input{k}); % add its xy pos name to pos {}
     if length(pos{k}) == 1 % for single digit positions, append 0 in front to make it two digits, ie 1 -> 01
@@ -39,7 +39,7 @@ end
 %% GENERATE MASKS AND CELL TRAJECTORIES
 
 % Input the number of traps per image
-colN = input('Input trap #: ');
+colN = input('Input # of traps: ');
 % Input the number of fluorescent channels to analyze
 fluN = input('Input # of fluorescent channels: ');
 

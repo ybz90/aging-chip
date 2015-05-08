@@ -22,6 +22,7 @@ function mask_traj(pos,imN,colN,fluN)
     % Define column slice width as the image width divided by colN
     block = round(512/colN);
 
+
     % For each frame...
     for imid = 1:imN
         fprintf('Frame number %d has %d columns.\n', imid, colN); %debug
@@ -34,11 +35,11 @@ function mask_traj(pos,imN,colN,fluN)
         I_nuc = imread(nuc_name);
 
         % Import every fluorescent channel
-        flu_names = [];
-        I_flu = [];
+        flu_names = cell(1,fluN);
+        I_flu = cell(1,fluN);
         for z = 1:fluN
             flu_names{z} = ['xy',pos,'/c',num2str(1+z),'/xy',pos,'_c',num2str(1+z),'_t',sprintf('%04g',imid),'.tif'];
-            I_flu{z} =imread(flu_names{z});
+            I_flu{z} = imread(flu_names{z});
         end
 
         % Output directory and mask image name
@@ -46,9 +47,12 @@ function mask_traj(pos,imN,colN,fluN)
         out_name_overlay = ['xy',pos,'/mask_overlay/xy',pos,'_mask_overlay_t',sprintf('%04g',imid),'.tif'];
 
         % Initialize mask image for this frame
-        %since 512 is not divisible by 7, the block size (col width) is rounded and we need to add a column of black pixels to get 511+1 = 512 px
         I_size = size(I_ph); % rows (image height), cols (image width)
-        I_nuc_mask = zeros(I_size(a),1);
+        if rem(I_size(2),colN) == 0 % if image width is divisible by 7, init blank mask array
+            I_nuc_mask = [];
+        else
+            I_nuc_mask = zeros(I_size(1),1); % since 512 is not divisible by 7, the block size (col width) is rounded and we need to add a column of black pixels to get 511+1 = 512 px
+        end
 
         % For each column in the current frame...
         for i = 1:colN
@@ -68,11 +72,11 @@ function mask_traj(pos,imN,colN,fluN)
 
             % If the cell masks are too small, reduce the threshold level to incrase mask size
             num_tries = 0;
-            while length(areas) ~= 0 && min(areas) < 30 && max(areas) < 100 && num_tries < 3 %while there are cells identified, and there are cells below area = 30 but not above area = 100, and the number of re-threshold attempts is <3
+            while ~isempty(areas) && min(areas) < 30 && max(areas) < 100 && num_tries < 3 %while there are cells identified, and there are cells below area = 30 but not above area = 100, and the number of re-threshold attempts is <3
             % NOTE: Another approach might be to look at the mother cell and dilate only if the mother cell is too small, improving accuracy of the important features of the mask.
-                level = level-0.01;
+                level = level-0.01; %reduce level for Otsu's method
                 num_tries = num_tries + 1;
-                BW = im2bw(Icf,level); %repeat Otsu's threshold with new paramaters
+                BW = im2bw(Icf,level); %repeat Otsu's method with new paramaters
                 BW2 = imfill(BW,'holes');
                 BW3 = imdilate(BW2, strel('disk',1));
                 mask_prop = regionprops(BW3,Icf,'Area');
@@ -103,7 +107,7 @@ function mask_traj(pos,imN,colN,fluN)
                 %fprintf('Column #%d has %d cells.\n', i, length(col_prop_2(:))/4); %debug
 
                 % The centroid with the highest y-coordinate value is the cell that is lowest in the trap, aka the mother cell; its index, idx, specifies the column in col_prop_2 that stores its properties
-                [max_y idx] = max(y_centroids);
+                [max_y,idx] = max(y_centroids);
 
                 % Properties of the mother cell, from the column #idx
                 mother_prop = col_prop_2(:,idx);
