@@ -52,6 +52,8 @@ end
 %
 %% VISUALIZATION & ANALYSIS
 
-plot_data()
+plot_data_single()
 
+%%
 
+plot_data_all()

@@ -46,8 +46,9 @@ function mask_traj(pos,imN,colN,fluN)
         out_name_overlay = ['xy',pos,'/mask_overlay/xy',pos,'_mask_overlay_t',sprintf('%04g',imid),'.tif'];
 
         % Initialize mask image for this frame
-        %I_nuc_mask = [];
-        I_nuc_mask = zeros(512,1); %since 512 is not divisible by 7, the block size (col width) is rounded and we need to add a column of black pixels to get 511+1 = 512 px
+        %since 512 is not divisible by 7, the block size (col width) is rounded and we need to add a column of black pixels to get 511+1 = 512 px
+        I_size = size(I_ph); % rows (image height), cols (image width)
+        I_nuc_mask = zeros(I_size(a),1);
 
         % For each column in the current frame...
         for i = 1:colN
