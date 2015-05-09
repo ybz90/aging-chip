@@ -50,8 +50,10 @@ for i = 1:posn
 end
 
 %
-%% VISUALIZATION & ANALYSIS
+%% VISUALIZATION
 
 %Plot the trajectories of each cell individually, along with vertical lines reflecting cell cycle budding times
 plot_data_single(colN,pos)
 
+%Plot the trajectories of all selected cells together on the same plot
+plot_data_all(colN,pos)
