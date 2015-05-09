@@ -52,8 +52,6 @@ end
 %
 %% VISUALIZATION & ANALYSIS
 
-plot_data_single()
+%Plot the trajectories of each cell individually, along with vertical lines reflecting cell cycle budding times
+plot_data_single(colN,pos)
 
-%%
-
-plot_data_all()

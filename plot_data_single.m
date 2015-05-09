@@ -1,13 +1,17 @@
-function plot_data_single
+function plot_data_single(colN,pos_str)
 
-    % plot_data.m takes the trajectories produced by mask_traj.m and combines that with manually curated data for when a cell has died to visualize traces. For now, we are also manually curating the cell cycle count, but once the Whi5 reporter is integrated, this can be automatically determined based on its localization.
+    % plot_data.m takes the trajectories produced by mask_traj.m and combines that with manually curated data for when a cell has died to visualize traces.
+    % For now, we are also manually curating the cell cycle count, but once the Whi5 reporter is integrated, this can be automatically determined based on its localization.
+    % Plots trajectories for every cell of the input xy positions, along with vertical lines marking the times of cell budding. Requires an input config file containing the start/end frames of each cell's lifespan and the times of budding. This file has filename in the format of xy01_lifespan.txt and format of cell#,start,end,bud1,bud2...
 
     % Yuan Zhao 05/08/2015
 
 
-    colN = 7; % there are seven traps / cells per position
-    positions = 01:02; %read this from configfile
-
+    % Convert input positions (pos from run_analysis.m) to numbers from strings
+    positions = [];
+    for g = 1:numel(pos_str)
+        positions(g) = str2num(pos_str{g});
+    end
 
     % Array for storing all trajectory data across all cells
     all_traj = [];
@@ -42,7 +46,7 @@ function plot_data_single
     % For every cell in all_traj...
     for j = 1:sz(2)
         [q,r] = quorem(sym(j-1),sym(colN));
-        pos_ID = ['xy',num2str(positions(q+1))]; % quotient of (cell # in all_traj - 1) and (colN per position) + 1 gives index in (positions) of this cell's original xy position ID
+        pos_ID = ['xy',pos_str(q+1)]; % quotient of (cell # in all_traj - 1) and (colN per position) + 1 gives index in (positions) of this cell's original xy position ID
         cell_no = r+1; % remainder of (cell # in all_traj - 1) and (colN per position) gives the cell # out of 7 of this cell in its original xy; where r = 0 is cell #1
 
         % Frames across which the current cell is alive, from manual curation of movies
@@ -64,7 +68,7 @@ function plot_data_single
         plot(X,curr_trace,styles(1));
         xlabel(ax1,'Time in frames');
         ylabel(ax1,'GFP');
-        cell_title = ['Position ',char(pos_ID),'; Cell # ',char(cell_no),'; Lifespan: ',num2str(lifespan)];
+        cell_title = ['Position ',cell2mat(pos_ID),'; Cell # ',char(cell_no),'; Lifespan: ',num2str(lifespan)];
         title(cell_title);
         hold on
 
