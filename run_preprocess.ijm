@@ -46,7 +46,6 @@ thrsh1 = thrshall[0]; thrsh2 = thrshall[1]; //define lower and upper thresolds
 directory = config[5]; //define working directory
 phase_ch_prefix = config[6]; //define phase channel prefix
 flu_ch_prefix = split(config[7],",");
-print (phase_ch_prefix, flu_ch_prefix[0], flu_ch_prefix[1])
 
 
 //Function for processing and subtracting background from fluorescent channels
@@ -61,7 +60,8 @@ function processFlu(xy,rot,start,end,reverse,directory,cname) {
 	}
 	run("Subtract Background...", "rolling=100 stack"); //substract background
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif"); //save stack to xy_pos directory
-	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"/]"); //export sequence of individual images to xy_pos/channel_type/raw for matlab code processing
+	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"/]"); //export sequence of individual images to xy_pos/flu_prefix
+	run("Close All"); //Close all windows
 }
 
 
@@ -120,7 +120,7 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_thr_t.tif");
 	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"_thr/]");
 	selectWindow("Results");
-	run("Close");
+	run("Close All"); //Close all windows
 }
 
 
@@ -156,7 +156,6 @@ for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 		curr_flu = flu_ch_prefix[j];
 		processFlu(xy,rot,start,end,reverse,directory,curr_flu);
 	}
-
 	run("Close All"); //Close all windows
 }
 ///////////////////
