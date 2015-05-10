@@ -120,7 +120,7 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_thr_t.tif");
 	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"_thr/]");
 	selectWindow("Results");
-	run("Close All"); //Close all windows
+	run("Close All");
 }
 
 
@@ -156,6 +156,6 @@ for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 		curr_flu = flu_ch_prefix[j];
 		processFlu(xy,rot,start,end,reverse,directory,curr_flu);
 	}
-	run("Close All"); //Close all windows
+	run("Close All");
 }
 ///////////////////
