@@ -4,15 +4,14 @@
  *
  * Manual steps:
  * 0) Place input image stacks in directory/data/ folder
- * 1) MANUALLY set the following variables as rows in config.txt
+ * 1) MANUALLY set the following variables as rows in run_preprocess_config.txt, place in directory/ folder
  *    a) xy; positions to process (ie 01,02,03,...)
  *    b) rot; angle to be rotated for each xy, measured from phase channel where + is CW and - is CCW (ie -0.74,-0.6,...)
  *    c) start, end; range of 'good' frames to keep; must be consistent across all positions (ie 1,796)
  *    d) reverse; 1 if stack needs to be vertically flipped so traps face "up" (ie 1,1,0,1,...)
  *    e) thrsh1, thrsh2; lower and upper threshold limits (ie 500,1500)
- *    f) directory; working directory path for folder root (ie /Volumes/Data/experiment)
- *    g) phase_ch_prefix; phase channel prefix (ie c1)
- *    h) flu_ch_prefix; all fluorescent channel prefixes (ie c2,c3,...)
+ *    f) phase_ch_prefix; phase channel prefix (ie c1)
+ *    g) flu_ch_prefix; all fluorescent channel prefixes (ie c2,c3,...)
  *
  * Fluorescent channel macro:
  * 1) Duplicate raw stack, make substack based on start/end frames
@@ -33,19 +32,18 @@
 
 
 //Import manually set variable configuration
-config = File.openAsString("/Users/yuanz/Git/aging-chip/run_preprocess_config.txt");
+directory = "/Volumes/Data HD/Workspace/20150429_NTS2/";
 
+config = File.openAsString(directory+"run_preprocess_config.txt");
 config = split(config,"\n"); //split each line of config
+
 xyarray = split(config[0],","); //split string of xy positions into xyarray
 rotarray = split(config[1],","); //split string of rot degrees into rotarray
-startend = split(config[2],",");
-start = startend[0]; end = startend[1]; //define start and end frames
+startend = split(config[2],","); start = startend[0]; end = startend[1]; //define start and end frames
 reversearray = split(config[3],","); //split string of reversal flags into reversearray
-thrshall = split(config[4],",");
-thrsh1 = thrshall[0]; thrsh2 = thrshall[1]; //define lower and upper thresolds
-directory = config[5]; //define working directory
-phase_ch_prefix = config[6]; //define phase channel prefix
-flu_ch_prefix = split(config[7],",");
+thrshall = split(config[4],","); thrsh1 = thrshall[0]; thrsh2 = thrshall[1]; //define lower and upper thresolds
+phase_ch_prefix = config[5]; //define phase channel prefix
+flu_ch_prefix = split(config[6],",");
 
 
 //Function for processing and subtracting background from fluorescent channels

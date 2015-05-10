@@ -2,7 +2,7 @@
 % Yuan Zhao 05/06/2015
 
 % Add scripts folder to search path
-addpath('/Users/yuanz/Git/aging-chip');
+addpath('/Users/yuanz/Git/aging-chip/scripts');
 
 % Input the position numbers to be analyzed
 pos_input = input('xy positions to analyze {01, 02, ..., 99}: ');
