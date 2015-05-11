@@ -1,43 +1,9 @@
-function plot_data_all(colN,pos_str)
+function plot_data_all(colN,pos_str,all_traj,all_lifespan)
 
-    %
+    % Plots trajectories of every cell of the input xy positions together on a single large plot.
 
-    % Yuan Zhao 05/10/2015
+    % Yuan Zhao 05/11/2015
 
-
-    % Convert input positions (pos from run_analysis.m) to numbers from strings
-    positions = [];
-    for g = 1:numel(pos_str)
-        positions(g) = str2num(pos_str{g});
-    end
-
-    % Array for storing all trajectory data across all cells
-    all_traj = [];
-    % Array for storing manually curated lifespan data
-    all_lifespan = cell(1,numel(positions));
-
-    % For every position...
-    for i = positions
-        % Rename single digit positions to double accordingly
-        if numel(i) == 1
-            pos = ['0',num2str(i)];
-        else
-            pos = num2str(i);
-        end
-
-        % Horizontally concatenate traj matrices for every position, forming a super array with dimensions:
-        % # of frames x # of cells/traps (from all positions) x # of fluorescent channel
-        traj_file = ['xy',pos,'/xy',pos,'_traj.mat'];
-        load(traj_file);
-        all_traj = horzcat(all_traj,traj);
-        sz = size(all_traj); % get the dimensions of the combined all_traj super array
-
-        % Import manually curated lifespan data for each cell in each position
-        % Add lifespan data to all_lifespan cell array (1 x num pos), where each position's lifespan data is an array with dim:
-        % # of cells rows x 3 cols (cell #, lifespan start frame, lifespan end frame)
-        lifespan_file = csvread(['xy',pos,'/xy',pos,'_lifespan.txt']);
-        all_lifespan{i} = lifespan_file;
-    end
 
     % Figure containing composite of traces for all cells
     figure;
@@ -50,18 +16,24 @@ function plot_data_all(colN,pos_str)
         %min_life = vertcat(min_life,all_lifespan{c}(:,2));
     end
     max_life = max(max_life);
-    styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
+    %styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
+    % Red to Black Colormap
+    styles = colormap(gray); % first col of gray has 64 rows; black is [0 0 0], red is [1 0 0]
+    styles = horzcat(styles(:,1),zeros(64,2)); %add first col of colormap(gray) to 64x2 mat of 0s
     style_num = numel(styles(:,1)); %round(lifespan/max_life)*style_num will translate lifespan of the cell into an index corresponding to the selected colormap
 
     % For every cell in all_traj...
+    sz = size(all_traj); % get the dimensions of the combined all_traj super array
     for j = 1:sz(2)
         [q,r] = quorem(sym(j-1),sym(colN));
         pos_ID = ['xy',pos_str(q+1)]; % quotient of (cell # in all_traj - 1) and (colN per position) + 1 gives index in (positions) of this cell's original xy position ID
         cell_no = r+1; % remainder of (cell # in all_traj - 1) and (colN per position) gives the cell # out of 7 of this cell in its original xy; where r = 0 is cell #1
 
         % Frames across which the current cell is alive, from manual curation of movies
-        lifespan = all_lifespan{q+1}(r+1,3);
-        X = all_lifespan{q+1}(r+1,2):lifespan;
+        life_end = all_lifespan{q+1}(r+1,3); % third column of appropriate lifespan data, based on pos ID
+        life_start = all_lifespan{q+1}(r+1,2); % second col
+        X = life_start:life_end; % lifespan range
+        lifespan = life_end-life_start;
 
         flu_vals = []; % store intensity values for all fluorescent channels
 
@@ -81,7 +53,7 @@ function plot_data_all(colN,pos_str)
         end
         hold off
 
-        cell_title = ['Position ',cell2mat(pos_ID),'; Cell # ',char(cell_no),'; Lifespan: ',num2str(lifespan)];
+        cell_title = 'TITLE';
         title(cell_title);
     end
 end

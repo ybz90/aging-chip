@@ -57,3 +57,7 @@ plot_data_single(colN,pos)
 
 %Plot the trajectories of all selected cells together on the same plot
 plot_data_all(colN,pos)
+
+%%
+
+run_plot_data(colN,pos)
