@@ -4,7 +4,7 @@ function plot_data_single(colN,pos_str)
     % For now, we are also manually curating the cell cycle count, but once the Whi5 reporter is integrated, this can be automatically determined based on its localization.
     % Plots trajectories for every cell of the input xy positions, along with vertical lines marking the times of cell budding. Requires an input config file containing the start/end frames of each cell's lifespan and the times of budding. This file has filename in the format of xy01_lifespan.txt and format of cell#,start,end,bud1,bud2...
 
-    % Yuan Zhao 05/08/2015
+    % Yuan Zhao 05/10/2015
 
 
     % Convert input positions (pos from run_analysis.m) to numbers from strings
@@ -62,16 +62,18 @@ function plot_data_single(colN,pos_str)
         cell_no = r+1; % remainder of (cell # in all_traj - 1) and (colN per position) gives the cell # out  of 7 of this cell in its original xy; where r = 0 is cell #1
 
         % Frames across which the current cell is alive, from manual curation of movies
-        lifespan = all_lifespan{q+1}(r+1,3); % third column of appropriate lifespan data, based on pos ID
-        X = all_lifespan{q+1}(r+1,2):lifespan; % lifespan range
+        life_end = all_lifespan{q+1}(r+1,3); % third column of appropriate lifespan data, based on pos ID
+        life_start = all_lifespan{q+1}(r+1,2); % second col
+        X = life_start:life_end; % lifespan range
+        lifespan = life_end-life_start;
 
         % Initialize current subplot
-        gridcol = 4; % four subplots per row
+        gridcol = 5; % four subplots per row
         subplot(ceil(sz(2)/gridcol),gridcol,j); % (rows,cols,current position); rows = numcells/gridcol rounded up
         flu_vals = [];  % store intensity values for all fluorescent channels
 
         % Define current style, based on lifespan and colormap from above
-        curr_style_idx = ceil((lifespan/max_life)*style_num);
+        curr_style_idx = ceil((lifespan/(max_life))*style_num);
         curr_style = styles(curr_style_idx,:);
 
         % Plot the first fluorescent channel
@@ -92,7 +94,7 @@ function plot_data_single(colN,pos_str)
         cycles = all_lifespan{q+1}(r+1,4:end);
         y1 = get(gca,'ylim'); % height of cell cycle bar
         for k = cycles
-            line([k k],y1,'Color','k')
+            line([k k],y1,'Color','k','LineStyle','--')
         end
 
         % % Plot every other fluorescent channel...

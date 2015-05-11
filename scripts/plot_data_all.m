@@ -1,8 +1,8 @@
-function plot_data_single(colN,pos_str)
+function plot_data_all(colN,pos_str)
 
     %
 
-    % Yuan Zhao 05/08/2015
+    % Yuan Zhao 05/10/2015
 
 
     % Convert input positions (pos from run_analysis.m) to numbers from strings
@@ -33,7 +33,7 @@ function plot_data_single(colN,pos_str)
         sz = size(all_traj); % get the dimensions of the combined all_traj super array
 
         % Import manually curated lifespan data for each cell in each position
-        % Add lifespan data to all_lifespan 1 x (num pos) cell array, where each lifespan data array has dim:
+        % Add lifespan data to all_lifespan cell array (1 x num pos), where each position's lifespan data is an array with dim:
         % # of cells rows x 3 cols (cell #, lifespan start frame, lifespan end frame)
         lifespan_file = csvread(['xy',pos,'/xy',pos,'_lifespan.txt']);
         all_lifespan{i} = lifespan_file;
@@ -41,6 +41,18 @@ function plot_data_single(colN,pos_str)
 
     % Figure containing composite of traces for all cells
     figure;
+
+    % Min/max lifespan of all cells; used to determine a gradient range for plot style color
+    max_life = [];
+    min_life = [];
+    for c = 1:numel(all_lifespan)
+        max_life = vertcat(max_life,all_lifespan{c}(:,3));
+        %min_life = vertcat(min_life,all_lifespan{c}(:,2));
+    end
+    max_life = max(max_life);
+    styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
+    style_num = numel(styles(:,1)); %round(lifespan/max_life)*style_num will translate lifespan of the cell into an index corresponding to the selected colormap
+
     % For every cell in all_traj...
     for j = 1:sz(2)
         [q,r] = quorem(sym(j-1),sym(colN));
@@ -51,8 +63,11 @@ function plot_data_single(colN,pos_str)
         lifespan = all_lifespan{q+1}(r+1,3);
         X = all_lifespan{q+1}(r+1,2):lifespan;
 
-        styles = ['r','b','m']; % color and style options for the different channels
         flu_vals = []; % store intensity values for all fluorescent channels
+
+        % Define current style, based on lifespan and colormap from above
+        curr_style_idx = ceil((lifespan/max_life)*style_num);
+        curr_style = styles(curr_style_idx,:);
 
         hold on
         % Plot every fluorescent channel...
@@ -61,21 +76,11 @@ function plot_data_single(colN,pos_str)
             flu_vals{flu} = curr_flu_val;
             curr_trace = cell2mat(flu_vals(flu));
 
-            plot(X,curr_trace,styles(flu))
+            plot(X,curr_trace,'Color',curr_style)
 
         end
         hold off
 
-        % Plot fluorescence w/ nuclear marker on the same plot
-        %[ax,p1,p2] = plotyy(X,B,X,C,'plot');
-        %grid(ax(1),'on')
-        %p1.LineWidth = 2;
-        %p2.LineWidth = 2;
-        %p2.LineSTyle = '--';
-
-        %ylabel(ax(1),'GFP');
-        %ylabel(ax(2),'iRFP (nuclear)');
-        %xlabel(ax(2),'Time in frames');
         cell_title = ['Position ',cell2mat(pos_ID),'; Cell # ',char(cell_no),'; Lifespan: ',num2str(lifespan)];
         title(cell_title);
     end
