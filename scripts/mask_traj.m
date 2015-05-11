@@ -34,7 +34,7 @@ function mask_traj(pos,imN,colN,fluN)
         nuc_name = ['xy',pos,'/c3/xy',pos,'_c3_t',sprintf('%04g',imid),'.tif'];
         I_nuc = imread(nuc_name);
 
-        % Import every fluorescent channel
+        % Input directory and image paths for every fluorescent channel
         flu_names = cell(1,fluN);
         I_flu = cell(1,fluN);
         for z = 1:fluN

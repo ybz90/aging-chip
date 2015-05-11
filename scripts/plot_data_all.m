@@ -53,7 +53,7 @@ function plot_data_all(colN,pos_str,all_traj,all_lifespan)
         end
         hold off
 
-        cell_title = 'TITLE';
+        cell_title = ['Positions xy',cell2mat(pos_str(1)),' - xy',cell2mat(pos_str(q+1))];
         title(cell_title);
     end
 end

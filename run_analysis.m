@@ -26,16 +26,6 @@ fprintf('Processing %d frames.\n', imN);
 %imN = input('Number of frames to process: ');
 
 %
-%% (OPTIONAL) REGISTER ALL FRAMES
-% If there is microscape stage shake or drift, register frames of all positions to adjust for this movement. Use only if necessary.
-
-for i = 1:posn
-    curr_pos = pos{i};
-    fprintf('Registering frames for position xy%d.\n', pos{i});
-    register_frames(pos{i},imN)
-end
-
-%
 %% GENERATE MASKS AND CELL TRAJECTORIES
 
 % Input the number of traps per image
@@ -52,12 +42,6 @@ end
 %
 %% VISUALIZATION
 
-%Plot the trajectories of each cell individually, along with vertical lines reflecting cell cycle budding times
-plot_data_single(colN,pos)
-
-%Plot the trajectories of all selected cells together on the same plot
-plot_data_all(colN,pos)
-
-%%
-
 run_plot_data(colN,pos)
+
+
