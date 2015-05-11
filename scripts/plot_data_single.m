@@ -52,7 +52,10 @@ function plot_data_single(colN,pos_str)
         %min_life = vertcat(min_life,all_lifespan{c}(:,2));
     end
     max_life = max(max_life);
-    styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
+    %styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
+    % Red to Black Colormap
+    styles = colormap(gray); % first col of gray has 64 rows; black is [0 0 0], red is [1 0 0]
+    styles = horzcat(styles(:,1),zeros(64,2)) %add first col of colormap(gray) to 64x2 mat of 0s
     style_num = numel(styles(:,1)); %round(lifespan/max_life)*style_num will translate lifespan of the cell into an index corresponding to the selected colormap
 
     % For every cell in all_traj...
