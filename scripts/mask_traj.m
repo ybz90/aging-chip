@@ -94,7 +94,7 @@ function mask_traj(pos,imN,colN,fluN)
             % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
             % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold
             % Limit the number of retries to < 3
-            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 30) && max(areas) < 150 && num_tries < 5
+            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 30) && max(areas) < 110 && num_tries < 7
                 level = level-0.005; %reduce level for Otsu's method
                 num_tries = num_tries + 1;
                 BW = im2bw(Icf,level); %repeat Otsu's method with new paramaters
@@ -103,6 +103,7 @@ function mask_traj(pos,imN,colN,fluN)
                 mask_prop = regionprops(BW3,Icf,'Area','Centroid');
             end
 
+            %NOTE: Remove all cells below a certain area, to remove the artifacts.
             %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios. Then we can do binary watershed or something similar and take the lower most object as the mother.
 
 

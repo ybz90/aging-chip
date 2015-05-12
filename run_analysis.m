@@ -37,7 +37,7 @@ fluN = input('Input # of fluorescent channels: ');
 
 for i = 1:posn
     curr_pos = pos{i};
-    fprintf('Generating mask and trajectories for position xy%d.\n', pos{i});
+    fprintf('Generating mask and trajectories for position xy%d.\n', str2num(curr_pos));
     mask_traj(curr_pos,imN,colN,fluN)
 end
 
@@ -47,3 +47,13 @@ end
 run_plot_data(colN,pos)
 
 
+
+
+
+
+%% MENG
+addpath('/Users/yuanz/Dropbox/Hao Lab/Projects/Aging Project/archived code/meng');
+%%
+register_frames(pos,imN)
+%%
+mask_gen(pos,imN)

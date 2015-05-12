@@ -51,7 +51,7 @@ function plot_data_single(colN,pos_str,all_traj,all_lifespan)
         curr_trace = cell2mat(flu_vals(1));
 
         ax1 = gca; % get information for first axes, as reference for other flu channel axes
-        plot(X,curr_trace,'Color',curr_style);
+        plot(X,curr_trace,'Color',curr_style,'LineWidth',2);
         xlabel(ax1,'Time in frames');
         ylabel(ax1,'GFP');
         cell_title = ['Position ',cell2mat(pos_ID),'; Cell # ',char(cell_no),'; Lifespan: ',num2str(lifespan)];
