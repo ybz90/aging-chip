@@ -1,6 +1,8 @@
 %% Pipeline wrapper for aging chip code
 % Yuan Zhao 05/06/2015
 
+%% Initialization
+
 % Add scripts folder to search path
 addpath('/Users/yuanz/Git/aging-chip/scripts');
 
@@ -26,7 +28,7 @@ fprintf('Processing %d frames.\n', imN);
 %imN = input('Number of frames to process: ');
 
 %
-%% GENERATE MASKS AND CELL TRAJECTORIES
+%% Generate masks and cell trajectories
 
 % Input the number of traps per image
 colN = input('Input # of traps: ');
@@ -40,7 +42,7 @@ for i = 1:posn
 end
 
 %
-%% VISUALIZATION
+%% Visualization
 
 run_plot_data(colN,pos)
 
