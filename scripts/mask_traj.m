@@ -77,7 +77,7 @@ function mask_traj(pos,imN,colN,fluN)
             y_centroids = all_centroids(2:2:end);
 
             % Structure for holding the cell fluorescence and other property data for all cells
-            % mask_prop_2 has dimensions of 4 rows (cell properties) x n cols (# of cells in the trap)
+            % mask_prop_2 has dimensions of 3 rows (cell properties) x n cols (# of cells in the trap)
             mask_prop_2 = [mask_prop(:).Area; x_centroids; y_centroids];
             %fprintf('Column #%d has %d cells.\n', i, length(mask_prop_2(:))/4); %debug
 
@@ -86,13 +86,16 @@ function mask_traj(pos,imN,colN,fluN)
 
             % Properties of the mother cell, from the column #idx
             mother_prop = mask_prop_2(:,idx); %mother_prop(1) is the area of the mother cell
+            areas = mask_prop_2(1,:);
 
-
-            % If the mother cell mask is too small, reduce the threshold level to increase mask radius
+            % Check the following conditions to determine whether or not to reduce the thresold level, therby increasing the mask radius
             num_tries = 0;
-            while ~isempty(mother_prop) && mother_prop(1) < 35 && num_tries < 3 %while there are cells identified, and there are cells below area = 30 but not above area = 100, and the number of re-threshold attempts is <3
-            % NOTE: Another approach might be to look at the mother cell and dilate only if the mother cell is too small, improving accuracy of the important features of the mask.
-                level = level-0.01; %reduce level for Otsu's method
+            % Check that there is a mother cell identified
+            % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
+            % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold
+            % Limit the number of retries to < 3
+            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 30) && max(areas) < 150 && num_tries < 5
+                level = level-0.005; %reduce level for Otsu's method
                 num_tries = num_tries + 1;
                 BW = im2bw(Icf,level); %repeat Otsu's method with new paramaters
                 BW2 = imfill(BW,'holes');
@@ -100,7 +103,7 @@ function mask_traj(pos,imN,colN,fluN)
                 mask_prop = regionprops(BW3,Icf,'Area','Centroid');
             end
 
-            %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios.
+            %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios. Then we can do binary watershed or something similar and take the lower most object as the mother.
 
 
             % Add current column mask to the overall mask image for output
