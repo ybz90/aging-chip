@@ -24,6 +24,7 @@ function mask_traj(pos,imN,colN,fluN)
 
     % Initialize overall overlayed mask of mother cell across all frames
     overall_mother = zeros(282,512); %%%%%%%%%%%%%%
+    overall_daughter = zeros(282,512);
 
 
     % For each frame...
@@ -54,9 +55,11 @@ function mask_traj(pos,imN,colN,fluN)
         if rem(I_size(2),colN) == 0 % if image width is divisible by 7, init blank mask array
             I_nuc_mask = []; % mask of all cells
             I_mother_mask = []; % mask of mother cell only
+            I_daughter_mask = []; % mask of lowest daughter cell only
         else
             I_nuc_mask = zeros(I_size(1),1); % since 512 is not divisible by 7, the block size (col width) is rounded and we need to add a column of black pixels to get 511+1 = 512 px
             I_mother_mask = zeros(I_size(1),1); %
+            I_daughter_mask = zeros(I_size(1),1); %
         end
 
         % For each column in the current frame...
@@ -155,9 +158,16 @@ function mask_traj(pos,imN,colN,fluN)
                 temp_mother = (L==num); %image is only the mask of the mother cell
                 temp_mother = temp_mother.';
             end
+            if num-1 == 0 %if there are no cells in the column, use a pure black, empty column (all zeros)
+                temp_daughter = zeros(282,block);
+            else
+                temp_daughter = (L==num-1);
+                temp_daughter = temp_daughter.';
+            end
             %figure; imshow(temp_mother)
             %figure; imshow(BW3)
             I_mother_mask = horzcat(I_mother_mask,temp_mother);
+            I_daughter_mask = horzcat(I_daughter_mask,temp_daughter);
 
 
             % For each of the fluorescent channels...
@@ -202,11 +212,15 @@ function mask_traj(pos,imN,colN,fluN)
 
         % Overlay current frame's concatenated mother cell mask with merged/overlayed stack so far
         overall_mother = overall_mother + I_mother_mask;
-        %figure; imshow(overall_mother)
+        overall_daughter = overall_daughter + I_daughter_mask;
     end
 
+    mother_only_mask = overall_mother - overall_daughter;
+    %figure; imshow(mother_only_mask>0)
     % Save overall_mother combined mask
-    figure; imshow(overall_mother)
+    imwrite(mother_only_mask, ['xy',pos,'/xy',pos,'_overall_mask.tif']);
+    %figure; imshow(overall_mother)
+    %figure; imshow(overall_daughter)
 
     % Write trajectory data to output_data
     save(output_data, 'traj');
