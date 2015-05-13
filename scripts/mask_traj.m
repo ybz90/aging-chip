@@ -9,15 +9,12 @@ function mask_traj(pos,imN,colN,fluN)
     % Yuan Zhao 05/07/2015
 
 
+    % Mask generation
+
     % Create output directory for storing masks
     mkdir(strcat('xy',pos,'/mask'))
     % Create output directory for storing mask+phase overlays
     mkdir(strcat('xy',pos,'/mask_overlay'))
-
-    % Initialize empty 3D matrix to store trajectories (frame #, trap #, flu channel #)
-    traj = zeros(imN, colN, fluN);
-    % Output trajectory data for all traps on this xy position
-    output_data =['xy',pos,'/xy',pos,'_traj.mat']; %include position and date in the filename
 
     % Define column slice width as the image width divided by colN
     block = round(512/colN);
@@ -26,13 +23,11 @@ function mask_traj(pos,imN,colN,fluN)
     overall_mother = zeros(282,512); %%%%%%%%%%%%%%
     overall_daughter = zeros(282,512);
 
-
-    % Mask generation
     % For each frame...
     for imid = 1:imN
         fprintf('Generating mask for frame number %d.\n', imid); %debug
 
-        % Input directory and image paths for nuclear marker, fluorescence, and phase channel images
+        % Input directory and image paths for nuclear marker and phase channel images
         ph_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
         I_ph = imread(ph_name);
 
@@ -185,78 +180,64 @@ function mask_traj(pos,imN,colN,fluN)
     end
 
     mother_only_mask = overall_mother - overall_daughter;
-    %figure; imshow(mother_only_mask>0)
-
-    % INSERT CLEANING STEP TO REMOVE EXCESS ARTIFACTS OUTSIDE OF A CERTAIN BOX/RADIUS
-
-    % Save overall_mother combined mask
-    imwrite(mother_only_mask, ['xy',pos,'/xy',pos,'_overall_mask.tif']);
+    mother_only_mask = mother_only_mask>0;
+    mother_only_mask = bwareaopen(mother_only_mask,25); %remove objects smaller than 25px
     %figure; imshow(overall_mother)
     %figure; imshow(overall_daughter)
 
+    % INSERT CLEANING STEP TO REMOVE EXCESS ARTIFACTS OUTSIDE OF A CERTAIN BOX/RADIUS
 
-    % Trajectory calculation
-    % For each frame...
-    for imid = 1:imN
-        fprintf('Calculating trajectory for frame number %d.\n', imid); %debug
-
-        % Input directory and image paths for nuclear marker, fluorescence, and phase channel images
-        ph_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
-        I_ph = imread(ph_name);
+    % Save mother_only_mask combined mask
+    imwrite(mother_only_mask, ['xy',pos,'/xy',pos,'_overall_mask.tif']);
 
 
+    % % Trajectory calculation
 
-        % Input directory and image paths for every fluorescent channel
-        flu_names = cell(1,fluN);
-        I_flu = cell(1,fluN);
-        for z = 1:fluN
-            flu_names{z} = ['xy',pos,'/c',num2str(1+z),'/xy',pos,'_c',num2str(1+z),'_t',sprintf('%04g',imid),'.tif'];
-            I_flu{z} = imread(flu_names{z});
-        end
+    % % Initialize empty 3D matrix to store trajectories (frame #, trap #, flu channel #)
+    % traj = zeros(imN, colN, fluN);
+    % % Output trajectory data for all traps on this xy position
+    % output_data =['xy',pos,'/xy',pos,'_traj.mat']; %include position and date in the filename
 
+    % % Label all the mother cells in the mother_only_mask, from left to right (col-wise is default)
+    % [M,N] = bwlabel(mother_only_mask);
+    % figure; imshow(mother_only_mask);
 
-        mothers = bwlabel(mother_only_mask);
+    % % For each frame...
+    % for imid = 1%:2%imN
+    %     fprintf('Calculating trajectory for frame number %d.\n', imid); %debug
 
+    %     % Input directory and image paths for every fluorescent channel
+    %     flu_names = cell(1,fluN);
+    %     I_flu = cell(1,fluN);
+    %     for z = 1:fluN
+    %         flu_names{z} = ['xy',pos,'/c',num2str(1+z),'/xy',pos,'_c',num2str(1+z),'_t',sprintf('%04g',imid),'.tif'];
+    %         I_flu{z} = imread(flu_names{z});
+    %     end
 
-        % For each column in the current frame...
-        for i = 1:colN
+    %     % For each mother cell / column...
+    %     for j = 1:N
+    %         curr_mother = (M==j);
+    %             %figure; imshow(curr_mother)
 
-            % For each of the fluorescent channels...
-            for y = 1:fluN
-                curr_I_flu = I_flu{y};
-                I_flu_col = curr_I_flu(:,1+(i-1)*block:i*block);
+    %         % For each of the fluorescent channels...
+    %         for y = 1:fluN
+    %             curr_I_flu = I_flu{y};
+    %             figure; imshow(curr_I_flu)
 
-                % Determine the properties of the segmented cells using regionprops(BW_image,Intensity_Image,Properties)
-                col_prop = regionprops(BW3,I_flu_col,'MeanIntensity','Centroid');
+    %             % Determine the properties of the mother cell using regionprops(BW_image,Intensity_Image,Properties)
+    %             col_prop = regionprops(curr_mother,curr_I_flu,'MeanIntensity');
 
-                % Get centroids of all cells and their x,y coordinates
-                all_centroids = [col_prop(:).Centroid];
-                x_centroids = all_centroids(1:2:end-1);
-                y_centroids = all_centroids(2:2:end);
+    %             % Structure for holding the cell fluorescence and other property data
+    %             col_prop_2 = [col_prop(:).MeanIntensity];
 
-                % Structure for holding the cell fluorescence and other property data for all cells
-                col_prop_2 = [col_prop(:).MeanIntensity; x_centroids; y_centroids];
+    %             % Store mother cell fluorescence in trajectories matrix
+    %             traj(imid,j,y) = col_prop_2;
+    %         end
 
-                % The centroid with the highest y-coordinate value (mother cell)
-                [max_y,idx] = max(y_centroids);
+    %     end
 
-                % Properties of the mother cell, from the column #idx
-                mother_prop = col_prop_2(:,idx);
-
-                % Store mother cell fluorescence in trajectories matrix
-                if numel(mother_prop) == 0 %if no cells are present in the trap
-                    traj(imid,i,y) = 0; %store 0 as the fluorescence
-                else
-                    traj(imid,i,y) = mother_prop(1);
-                end
-
-            end
-
-        end
-
-    end
+    % end
 
     % Write trajectory data to output_data
     save(output_data, 'traj');
-
 end
