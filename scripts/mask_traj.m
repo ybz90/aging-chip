@@ -47,7 +47,7 @@ function mask_traj(pos,imN,colN,fluN)
         out_name_overlay = ['xy',pos,'/mask_overlay/xy',pos,'_mask_overlay_t',sprintf('%04g',imid),'.tif'];
 
         % Initialize mask image for this frame
-        I_size = size(I_ph); % rows (image height), cols (image width)
+        I_size = size(I_nuc); % rows (image height), cols (image width)
         if rem(I_size(2),colN) == 0 % if image width is divisible by 7, init blank mask array
             I_nuc_mask = [];
         else
@@ -88,19 +88,48 @@ function mask_traj(pos,imN,colN,fluN)
             mother_prop = mask_prop_2(:,idx); %mother_prop(1) is the area of the mother cell
             areas = mask_prop_2(1,:);
 
-            % Check the following conditions to determine whether or not to reduce the thresold level, therby increasing the mask radius
+            % If there are no cells detected via nuclear mask in this column, reduce threshold up to 3 times to try to detect them
             num_tries = 0;
-            % Check that there is a mother cell identified
-            % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
-            % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold
-            % Limit the number of retries to < 3
-            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 30) && max(areas) < 110 && num_tries < 7
+            while isempty(mother_prop) && num_tries < 3
+                num_tries = num_tries + 1;
+                level = level-0.005;
+                BW = im2bw(Icf,level); %repeat Otsu's method with new paramaters
+                BW2 = imfill(BW,'holes');
+                BW3 = imdilate(BW2, strel('disk',1));
+                mask_prop = regionprops(BW3,Icf,'Area','Centroid');
+
+                all_centroids = [mask_prop(:).Centroid];
+                x_centroids = all_centroids(1:2:end-1);
+                y_centroids = all_centroids(2:2:end);
+                mask_prop_2 = [mask_prop(:).Area; x_centroids; y_centroids];
+                [max_y,idx] = max(y_centroids);
+                mother_prop = mask_prop_2(:,idx);
+                areas = mask_prop_2(1,:);
+            end
+
+            num_tries = 0;
+            % Check the following conditions to determine whether or not to further reduce the thresold level, thereby increasing the mask radius
+            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 35) && max(areas) < 150 && num_tries < 7
+                % Check that there is a mother cell identified
+                % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
+                % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold
+                % Limit the number of retries to < 3
                 level = level-0.005; %reduce level for Otsu's method
                 num_tries = num_tries + 1;
                 BW = im2bw(Icf,level); %repeat Otsu's method with new paramaters
                 BW2 = imfill(BW,'holes');
                 BW3 = imdilate(BW2, strel('disk',1));
                 mask_prop = regionprops(BW3,Icf,'Area','Centroid');
+
+                all_centroids = [mask_prop(:).Centroid];
+                x_centroids = all_centroids(1:2:end-1);
+                y_centroids = all_centroids(2:2:end);
+                mask_prop_2 = [mask_prop(:).Area; x_centroids; y_centroids];
+                [max_y,idx] = max(y_centroids);
+                mother_prop = mask_prop_2(:,idx);
+                areas = mask_prop_2(1,:);
+
+                %[mother_prop(1),min(areas),max(areas),num_tries] %debug
             end
 
             %NOTE: Remove all cells below a certain area, to remove the artifacts.
