@@ -107,9 +107,9 @@ function mask_traj(pos,imN,colN,fluN)
                 areas = mask_prop_2(1,:);
             end
 
-            num_tries = 0;
+            %num_tries = 0;
             % Check the following conditions to determine whether or not to further reduce the thresold level, thereby increasing the mask radius
-            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 35) && max(areas) < 150 && num_tries < 7
+            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 35) && max(areas) < 150 && num_tries < 8
                 % Check that there is a mother cell identified
                 % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
                 % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold

@@ -1,4 +1,4 @@
-function run_plot_data(colN,pos_str)
+function plot_data(colN,pos_str)
 
     % run_plot_data.m takes the trajectories produced by mask_traj.m and combines that with manually curated data for when a cell has died to visualize traces.
     % This input config file contains the start/end frames of each cell's lifespan and the times of budding. The filename is of the pattern of xy01_lifespan.txt and has a data format of cell#,start,end,bud1,bud2...
@@ -44,9 +44,9 @@ function run_plot_data(colN,pos_str)
     % Run plotting scripts here
 
     % Individual subplots for every trajectory
-    plot_data_single(colN,pos_str,all_traj,all_lifespan)
+    data_single(colN,pos_str,all_traj,all_lifespan)
 
     % All trajectories together on a single plot
-    plot_data_all(colN,pos_str,all_traj,all_lifespan)
+    data_all(colN,pos_str,all_traj,all_lifespan)
 
 end

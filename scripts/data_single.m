@@ -1,4 +1,4 @@
-function plot_data_single(colN,pos_str,all_traj,all_lifespan)
+function data_single(colN,pos_str,all_traj,all_lifespan)
 
     % For now, we are also manually curating the cell cycle count, but once the Whi5 reporter is integrated, this can be automatically determined based on its localization.
     % Plots trajectories for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding.

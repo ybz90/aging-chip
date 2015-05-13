@@ -44,16 +44,6 @@ end
 %
 %% Visualization
 
-run_plot_data(colN,pos)
+plot_data(colN,pos)
 
 
-
-
-
-
-%% MENG
-addpath('/Users/yuanz/Dropbox/Hao Lab/Projects/Aging Project/archived code/meng');
-%%
-register_frames(pos,imN)
-%%
-mask_gen(pos,imN)

@@ -1,4 +1,4 @@
-function plot_data_all(colN,pos_str,all_traj,all_lifespan)
+function data_all(colN,pos_str,all_traj,all_lifespan)
 
     % Plots trajectories of every cell of the input xy positions together on a single large plot.
 
