@@ -11,9 +11,8 @@ User Guide:
 4. Use run_analysis to generate masks, trajectories, and visualizations
 
 
-
 Work in progress:
+
 - Mask generation optimizations (more consistent masks, disappearing nuclei, etc.)
 - Remove small objects below an area representative of cells
 - Declump when the mother is too non-circular, generally reflecting a frame capture during budding
-- Use top 50%(?) intensity rather than mean intensity as the measurement of fluorescence

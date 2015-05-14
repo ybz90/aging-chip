@@ -13,6 +13,8 @@ function mask_traj(pos,imN,colN,fluN)
     mkdir(strcat('xy',pos,'/mask'))
     % Create output directory for storing mask+phase overlays
     mkdir(strcat('xy',pos,'/mask_overlay'))
+    % Create output directory for storing mother mask+phase overlays
+    mkdir(strcat('xy',pos,'/mother_overlay'))
 
     % Initialize empty 3D matrix to store trajectories (frame #, trap #, flu channel #)
     traj = zeros(imN, colN, fluN);
@@ -61,6 +63,7 @@ function mask_traj(pos,imN,colN,fluN)
         % Output directory and mask image name
         out_name = ['xy',pos,'/mask/xy',pos,'_mask_t',sprintf('%04g',imid),'.tif'];
         out_name_overlay = ['xy',pos,'/mask_overlay/xy',pos,'_mask_overlay_t',sprintf('%04g',imid),'.tif'];
+        out_name_mother = ['xy',pos,'/mother_overlay/xy',pos,'_mother_overlay_t',sprintf('%04g',imid),'.tif'];
 
         % Initialize mask image for this frame
         if rem(width,colN) == 0 % if image width is divisible by 7, init blank mask array
@@ -226,12 +229,10 @@ function mask_traj(pos,imN,colN,fluN)
                 if numel(mother_prop) == 0 %if no cells are present in the trap
                     traj(imid,i,y) = 0; %store 0 as the fluorescence
                 else
-                    traj(imid,i,y) = col_prop_4
+                    traj(imid,i,y) = col_prop_4;
                 end
             end
         end
-
-        %figure; imshow(I_mother_mask);
 
         % Output mask image
         imwrite(I_nuc_mask, out_name);
@@ -241,6 +242,11 @@ function mask_traj(pos,imN,colN,fluN)
         I_overlay = imfuse(I_ph,I_nuc_mask,'falsecolor','ColorChannels','red-cyan');
         %figure; imshow(I_overlay)
         imwrite(I_overlay, out_name_overlay)
+
+        % Output mother mask+phase overlay
+        I_overlay_2 = imfuse(I_ph,I_mother_mask,'falsecolor','ColorChannels','red-cyan');
+        %figure; imshow(I_overlay_2);
+        imwrite(I_overlay_2, out_name_mother)
     end
 
     % Write trajectory data to output_data
