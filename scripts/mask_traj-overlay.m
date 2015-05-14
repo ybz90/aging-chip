@@ -85,13 +85,9 @@ function mask_traj(pos,imN,colN,fluN)
 
 
 
-
-
-
             % INSERT mask_optimize.m CODE FRAGMENT HERE
 
-          % I have commented out this section of mask optimization in the interest of speed and performance. Since all of the masks are simply being overlaid atop one another anyway, it is a reasonable presumption that there will be little difference if a few masks are missing on certain frames, versus if each frame's mask is used individually, in which case it is crucial that the mother cell is correctly detected and thresholded.
-
+            % I have commented out this section of mask optimization in the interest of speed and performance. Since all of the masks are simply being overlaid atop one another anyway, it is a reasonable presumption that there will be little difference if a few masks are missing on certain frames, versus if each frame's mask is used individually, in which case it is crucial that the mother cell is correctly detected and thresholded.
 
 
             mask_prop = regionprops(BW3,Icf,'Area','Centroid'); %areas and centroids of the cell masks for the current column
@@ -158,16 +154,8 @@ function mask_traj(pos,imN,colN,fluN)
 
                 %[mother_prop(1),min(areas),max(areas),num_tries] %debug
             end
-
             %NOTE: Remove all cells below a certain area, to remove the artifacts.
             %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios. Then we can do binary watershed or something similar and take the lower most object as the mother.
-
-
-
-
-
-
-
 
 
 
