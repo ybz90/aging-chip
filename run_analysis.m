@@ -57,3 +57,15 @@ end
 plot_data(colN,pos)
 
 
+%% Generate masks and cell trajectories
+
+% Input the number of traps per image
+colN = input('Input # of traps: ');
+% Input the number of fluorescent channels to analyze
+fluN = input('Input # of fluorescent channels: ');
+
+for i = 1:posn
+    curr_pos = pos{i};
+    fprintf('Generating mask and trajectories for position xy%d.\n', str2num(curr_pos));
+    old_mask_traj(curr_pos,imN,colN,fluN)
+end

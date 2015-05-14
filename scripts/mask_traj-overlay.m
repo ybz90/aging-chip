@@ -26,11 +26,11 @@ function mask_traj(pos,imN,colN,fluN)
     width = I_size(2);
 
     % Define column slice width as the image width divided by colN
-    block = round(512/colN);
+    block = round(width/colN);
 
     % Initialize overall overlaid mask of mother cell across all frames
-    overall_mother = zeros(282,512); %%%%%%%%%%%%%%
-    overall_daughter = zeros(282,512);
+    overall_mother = zeros(height,width); %%%%%%%%%%%%%%
+    overall_daughter = zeros(height,width);
 
     % Store the centroids of each mother cell during early frames
     mother_x = cell(1,colN);
@@ -81,7 +81,97 @@ function mask_traj(pos,imN,colN,fluN)
             BW3 = imdilate(BW2, strel('disk',1)); %dilate mask with disk
             %figure; imshow(BW3) %debug
 
+
+
+
+
+
+
+
             % INSERT mask_optimize.m CODE FRAGMENT HERE
+
+          % I have commented out this section of mask optimization in the interest of speed and performance. Since all of the masks are simply being overlaid atop one another anyway, it is a reasonable presumption that there will be little difference if a few masks are missing on certain frames, versus if each frame's mask is used individually, in which case it is crucial that the mother cell is correctly detected and thresholded.
+
+
+
+            mask_prop = regionprops(BW3,Icf,'Area','Centroid'); %areas and centroids of the cell masks for the current column
+
+            % Get centroids of all cells and their x,y coordinates
+            all_centroids = [mask_prop(:).Centroid];
+            x_centroids = all_centroids(1:2:end-1);
+            y_centroids = all_centroids(2:2:end);
+
+            % Structure for holding the cell area and centroid data for all cells
+            % mask_prop_2 has dimensions of 3 rows (cell properties) x n cols (# of cells in the trap)
+            mask_prop_2 = [mask_prop(:).Area; x_centroids; y_centroids];
+            %fprintf('Column #%d has %d cells.\n', i, length(mask_prop_2(:))/4); %debug
+
+            % The centroid with the highest y-coordinate value is the cell that is lowest in the trap, aka the mother cell; its index, idx, specifies the column in mask_prop_2 that stores its properties
+            [max_y,idx] = max(y_centroids);
+
+            % Properties of the mother cell, from the column #idx
+            mother_prop = mask_prop_2(:,idx); %mother_prop(1) is the area of the mother cell
+            areas = mask_prop_2(1,:);
+
+
+            % Mask optimization code for if cells are not detected or if they do not meet certain quality conditions
+            % If there are no cells detected via nuclear mask in this column, reduce threshold up to 3 times to try to detect them
+            num_tries = 0;
+            while isempty(mother_prop) && num_tries < 3
+                num_tries = num_tries + 1;
+                level = level-0.005;
+                BW = im2bw(Icf,level); %repeat Otsu's method with new paramaters
+                BW2 = imfill(BW,'holes');
+                BW3 = imdilate(BW2, strel('disk',1));
+                mask_prop = regionprops(BW3,Icf,'Area','Centroid');
+
+                all_centroids = [mask_prop(:).Centroid];
+                x_centroids = all_centroids(1:2:end-1);
+                y_centroids = all_centroids(2:2:end);
+                mask_prop_2 = [mask_prop(:).Area; x_centroids; y_centroids];
+                [max_y,idx] = max(y_centroids);
+                mother_prop = mask_prop_2(:,idx);
+                areas = mask_prop_2(1,:);
+            end
+
+            %num_tries = 0;
+            % Check the following conditions to determine whether or not to further reduce the thresold level, thereby increasing the mask radius
+            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 35) && max(areas) < 150 && num_tries < 8
+                % Check that there is a mother cell identified
+                % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
+                % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold
+                % Limit the number of retries to < 3
+                level = level-0.005; %reduce level for Otsu's method
+                num_tries = num_tries + 1;
+                BW = im2bw(Icf,level); %repeat Otsu's method with new paramaters
+                BW2 = imfill(BW,'holes');
+                BW3 = imdilate(BW2, strel('disk',1));
+                mask_prop = regionprops(BW3,Icf,'Area','Centroid');
+
+                all_centroids = [mask_prop(:).Centroid];
+                x_centroids = all_centroids(1:2:end-1);
+                y_centroids = all_centroids(2:2:end);
+                mask_prop_2 = [mask_prop(:).Area; x_centroids; y_centroids];
+                [max_y,idx] = max(y_centroids);
+                mother_prop = mask_prop_2(:,idx);
+                areas = mask_prop_2(1,:);
+
+                %[mother_prop(1),min(areas),max(areas),num_tries] %debug
+            end
+
+            %NOTE: Remove all cells below a certain area, to remove the artifacts.
+            %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios. Then we can do binary watershed or something similar and take the lower most object as the mother.
+
+
+
+
+
+
+
+
+
+
+
 
             % bwlabel does column-wise search by default; so to do row-wise searching for the lowest object, we transpose the BW3 binary image input and then transpose back the output of bwlabel
             BW4 = BW3.';
@@ -159,7 +249,7 @@ function mask_traj(pos,imN,colN,fluN)
         x_cen = ceil(x_cen);
         y_cen = mean(mother_y{k});
         y_cen = ceil(y_cen);
-        s = 7; % length of square's side
+        s = 8; % length of square's side
         for xc = x_cen-s:x_cen+s % create a square around centroid of side length 2*s
             for yc = y_cen-s:y_cen+s
                 %[xc,yc];
@@ -228,10 +318,14 @@ function mask_traj(pos,imN,colN,fluN)
 
                 % Structure for holding the cell fluorescence and other property data
                 col_prop_2 = [col_prop(:).PixelValues]; %the values of all the pixels in the mother cell mask
-                col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
-                num_px = numel(col_prop_3); %number of pixels (area) of mother cell
-                top_50 = floor(num_px/2+1):num_px; % top 50% range
-                col_prop_4 = mean(col_prop_3(top_50)); %
+                % col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
+                % num_px = numel(col_prop_3); %number of pixels (area) of mother cell
+                % top_50 = floor(0.5*num_px+1):num_px; % top 50% range
+                % col_prop_4 = mean(col_prop_3(top_50)); %
+                mi_px = min(col_prop_2); ma_px = max(col_prop_2);
+                avg_px = (ma_px - mi_px)*0.5 + mi_px;
+                col_prop_3 = col_prop_2(col_prop_2 > avg_px);
+                col_prop_4 = mean(col_prop_3);
 
                 % Store mother cell fluorescence in trajectories matrix
                 traj(imid,j,y) = col_prop_4;
