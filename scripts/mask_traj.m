@@ -18,6 +18,13 @@ function mask_traj(pos,imN,colN,fluN)
     % Create output directory for storing mother only mask+phase overlays
     mkdir(strcat('xy',pos,'/mother_mask_overlay'))
 
+    % Get image dimensions
+    ph_1 = ['xy',pos,'/c1/xy',pos,'_c1_t0001.tif'];
+    I_ph_1 =imread(ph_1);
+    I_size = size(I_ph_1); % rows (image height), cols (image width)
+    height = I_size(1);
+    width = I_size(2);
+
     % Define column slice width as the image width divided by colN
     block = round(512/colN);
 
@@ -48,15 +55,15 @@ function mask_traj(pos,imN,colN,fluN)
 
 
         % Initialize mask images for this frame
-        I_size = size(I_nuc); % rows (image height), cols (image width)
-        if rem(I_size(2),colN) == 0 % if image width is divisible by 7, init blank mask array
+        I_size = size(I_nuc);
+        if rem(width,colN) == 0 % if image width is divisible by 7, init blank mask array
             I_nuc_mask = []; % mask of all cells
             I_mother_mask = []; % mask of mother cell only
             I_daughter_mask = []; % mask of lowest daughter cell only
         else
-            I_nuc_mask = zeros(I_size(1),1); % since 512 is not divisible by 7, the block size (col width) is rounded and we need to add a column of black pixels to get 511+1 = 512 px
-            I_mother_mask = zeros(I_size(1),1); %
-            I_daughter_mask = zeros(I_size(1),1); %
+            I_nuc_mask = zeros(height,1); % since 512 is not divisible by 7, the block size (col width) is rounded and we need to add a column of black pixels to get 511+1 = 512 px
+            I_mother_mask = zeros(height,1); %
+            I_daughter_mask = zeros(height,1); %
         end
 
 
@@ -81,14 +88,14 @@ function mask_traj(pos,imN,colN,fluN)
             [L,num] = bwlabel(BW4); %
 
             if num == 0 %if there is no cells in the column, use a pure black, empty column (all zeros)
-                temp_mother = zeros(282,block);
+                temp_mother = zeros(height,block);
             else
                 temp_mother = (L==num); %image is only the mask of the mother cell
                 temp_mother = temp_mother.';
             end
 
             if num-1 == 0 %if there are no daughter cells in the column, use a pure black, empty column (all zeros)
-                temp_daughter = zeros(282,block);
+                temp_daughter = zeros(height,block);
             else
                 temp_daughter = (L==num-1);
                 temp_daughter = temp_daughter.';
@@ -146,7 +153,7 @@ function mask_traj(pos,imN,colN,fluN)
         % Taking only pixels with value 1 gives us the mask that overlaps with the square
 
     % Generate square binary image with which to constrict mother_only_mask
-    constrictBW = zeros(282,512);
+    constrictBW = zeros(height,width);
     for k = 1:colN % for every centroid
         x_cen = mean(mother_x{k})+(k-1)*block; %add block*(k-1) to x-coord account for column of centroid
         x_cen = ceil(x_cen);
@@ -168,9 +175,9 @@ function mask_traj(pos,imN,colN,fluN)
     mother_constrict = double_mother - constrictBW;
 
     % Generate final mother cell mask, constrained by centroid-centered squares
-    mother_only_final = zeros(282,512);
-    for l = 1:282
-        for m = 1:512
+    mother_only_final = zeros(height,width);
+    for l = 1:height
+        for m = 1:width
             if mother_constrict(l,m) == 1
                 mother_only_final(l,m) = 1;
             end
