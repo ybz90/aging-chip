@@ -1,5 +1,5 @@
 %% Pipeline wrapper for aging chip code
-% Yuan Zhao 05/06/2015
+% Yuan Zhao 05/13/2015
 
 %% Initialization
 
@@ -26,6 +26,16 @@ fprintf('Processing %d frames.\n', imN);
 
 % (DEBUG) Input the number of frames (times) to be processed
 %imN = input('Number of frames to process: ');
+
+%
+%% (OPTIONAL) REGISTER ALL FRAMES
+% If there is microscape stage shake or drift, register frames of all positions to adjust for this movement. Use only if necessary.
+
+for i = 1:posn
+    curr_pos = pos{i};
+    fprintf('Registering frames for position xy%d.\n', pos{i});
+    register_frames(pos{i},imN)
+end
 
 %
 %% Generate masks and cell trajectories

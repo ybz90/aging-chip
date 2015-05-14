@@ -224,13 +224,17 @@ function mask_traj(pos,imN,colN,fluN)
                 %figure; imshow(curr_I_flu)
 
                 % Determine the properties of the mother cell using regionprops(BW_image,Intensity_Image,Properties)
-                col_prop = regionprops(curr_mother,curr_I_flu,'MeanIntensity');
+                col_prop = regionprops(curr_mother,curr_I_flu,'PixelValues');
 
                 % Structure for holding the cell fluorescence and other property data
-                col_prop_2 = [col_prop(:).MeanIntensity];
+                col_prop_2 = [col_prop(:).PixelValues]; %the values of all the pixels in the mother cell mask
+                col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
+                num_px = numel(col_prop_3); %number of pixels (area) of mother cell
+                top_50 = floor(num_px/2+1):num_px; % top 50% range
+                col_prop_4 = mean(col_prop_3(top_50)); %
 
                 % Store mother cell fluorescence in trajectories matrix
-                traj(imid,j,y) = col_prop_2;
+                traj(imid,j,y) = col_prop_4;
             end
         end
     end

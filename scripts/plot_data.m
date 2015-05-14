@@ -47,6 +47,6 @@ function plot_data(colN,pos_str)
     data_single(colN,pos_str,all_traj,all_lifespan)
 
     % All trajectories together on a single plot
-    data_all(colN,pos_str,all_traj,all_lifespan)
+    %data_all(colN,pos_str,all_traj,all_lifespan)
 
 end
