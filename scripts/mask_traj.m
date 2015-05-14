@@ -160,6 +160,7 @@ function mask_traj(pos,imN,colN,fluN)
             % Get the mask of the mother cell only for this column
             % bwlabel does column-wise search by default; so to do row-wise searching for the lowest object, we transpose the BW3 binary image input and then transpose back the output of bwlabel
             BW4 = BW3.';
+            % ADD A STEP TO BWAREAOPEN REMOVE VERY TINY OBJECTS ARTIFACTS BUT NOT TOO SMALL IN CASE THERE ARE MINISCULE NUCLEAR MARKERS BARELY DETECTED
             [L,num] = bwlabel(BW4); %
 
             if num == 0 %if there is no cells in the column, use a pure black, empty column (all zeros)
@@ -167,6 +168,17 @@ function mask_traj(pos,imN,colN,fluN)
             else
                 temp_mother = (L==num); %image is only the mask of the mother cell
                 temp_mother = temp_mother.'; %transpose to orient axes correctly
+            end
+
+            % Increase the size of the mother if it is too small
+            mother_area = regionprops(temp_mother,'Area');
+            if ~isempty(mother_area)
+                mother_area_2 = [mother_area(1).Area];
+                while mother_area_2 < 50
+                    temp_mother = imdilate(temp_mother, strel('disk',1));
+                    mother_area = regionprops(temp_mother,'Area');
+                    mother_area_2 = [mother_area(1).Area];
+                end
             end
 
             % Find centroid of current col mother cell, update mother_x, mother_y, and mother_BW arrays IF the current mother cell meets the following criteria:
@@ -234,9 +246,9 @@ function mask_traj(pos,imN,colN,fluN)
             end
         end
 
-        % Output mask image
-        imwrite(I_nuc_mask, out_name);
-        %figure; imshow(I_nuc_mask);
+        % % Output mask image
+        % imwrite(I_nuc_mask, out_name);
+        % %figure; imshow(I_nuc_mask);
 
         % Output mask+phase overlay
         I_overlay = imfuse(I_ph,I_nuc_mask,'falsecolor','ColorChannels','red-cyan');

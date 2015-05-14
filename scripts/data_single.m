@@ -3,7 +3,7 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
     % For now, we are also manually curating the cell cycle count, but once the Whi5 reporter is integrated, this can be automatically determined based on its localization.
     % Plots trajectories for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding.
 
-    % Yuan Zhao 05/11/2015
+    % Yuan Zhao 05/13/2015
 
 
     % Figure for containing subplots of traces for each cell
@@ -51,7 +51,7 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
         curr_trace = cell2mat(flu_vals(1));
 
         ax1 = gca; % get information for first axes, as reference for other flu channel axes
-        plot(X,curr_trace,'Color',curr_style,'LineWidth',2);
+        plot(X,curr_trace,'Color',curr_style,'LineWidth',1);
         xlabel(ax1,'Time in frames');
         ylabel(ax1,'GFP');
         cell_title = ['Position ',cell2mat(pos_ID),'; Cell # ',char(cell_no),'; Lifespan: ',num2str(lifespan)];
