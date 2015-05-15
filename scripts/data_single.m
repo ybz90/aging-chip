@@ -12,20 +12,20 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
     % Figure for containing subplots of traces for each cell
     figure;
 
-    % Min/max lifespan of all cells; used to determine a gradient range for plot style color
-    max_life = [];
-    min_life = [];
-    for c = 1:numel(all_lifespan)
-        max_life = vertcat(max_life,all_lifespan{c}(:,3));
-        %min_life = vertcat(min_life,all_lifespan{c}(:,2));
+    % Min/max replicative lifespan of all cells; used to determine a gradient range for plot style color
+    max_cycles = cell(1,numel(all_lifespan)); % the highest # of rep life cycles for each position to be plotted; simply take the # of bud frames as the traps with fewer than the max will fill in a 0 anyway
+    min_cycles = cell(1,numel(all_lifespan));
+    for c = 1:numel(pos_str)
+        curr_life = all_lifespan{c};
+        max_cycles{c} = numel(curr_life(1,4:end));
     end
-    max_life = max(max_life);
+    max_cycles = max(cell2mat(max_cycles));
 
     %styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
     % Red to Black Colormap
     styles = colormap(gray); % first col of gray has 64 rows; black is [0 0 0], red is [1 0 0]
     styles = horzcat(styles(:,1),zeros(64,2)); %add first col of colormap(gray) to 64x2 mat of 0s
-    style_num = numel(styles(:,1)); %round(lifespan/max_life)*style_num will translate lifespan of the cell into an index corresponding to the selected colormap
+    style_num = numel(styles(:,1)); %round(num_cycles/max_cycles)*style_num will translate lifespan of the cell into an index corresponding to the selected colormap
 
 
     % Total number of cells to be plotted
@@ -55,7 +55,7 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
             cell_ID = curr_life(l,1); %the trap in which the current cell is actually located, as not every cell is to be plotted and has info in curr_life
 
             % Initialize current subplot
-            gridcol = 5; % four subplots per row
+            gridcol = 8; % four subplots per row
             subplot(ceil(num_cell_all/gridcol),gridcol,subplot_num+l); % (rows,cols,current position); rows = num_cell_all/gridcol rounded up; current position is the running total of subplots so far, up to this frame, plus the num of the current cell in this frame
             flu_vals = [];  % store intensity values for all fluorescent channels
 
@@ -63,10 +63,15 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
             life_end = curr_life(l,3); % third column of appropriate lifespan data
             life_start = curr_life(l,2); % second col
             X = life_start:life_end; % lifespan range
-            lifespan = life_end-life_start;
 
-            % Define current style, based on lifespan and colormap from above
-            curr_style_idx = ceil((lifespan/(max_life))*style_num);
+            % Get number of budding cycles from the curr_life data
+            %NOTE: Once Whi5 reporter is integrated, cell cycle data can be automated; for now, this too must be added manually
+            cycles = curr_life(l,4:end); %budding frames for the current cell
+            cycles = cycles(cycles>0); %remove all 0 entries in the cycles array
+            num_cycles = numel(cycles); %replicative life span (# of buds) for current cell, after 0s are removed
+
+            % Define current style, based on num budding cycles and colormap from above
+            curr_style_idx = ceil((num_cycles/(max_cycles))*style_num)
             curr_style = styles(curr_style_idx,:);
 
 
@@ -79,13 +84,11 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
             plot(X,curr_trace,'Color',curr_style,'LineWidth',1);
             xlabel(ax1,'Time in frames');
             ylabel(ax1,'GFP');
-            cell_title = ['Position ',pos,'; Cell # ',num2str(cell_ID),'; Replicative Lifespan: ',num2str(lifespan)];
+            cell_title = ['Position ',pos,', Cell # ',num2str(cell_ID),'; Replicative Lifespan: ',num2str(num_cycles)];
             title(cell_title);
             hold on
 
-            %Plot cell cycle data as vertical lines; get the cell cycle data from the lifespan file
-            %NOTE: Once Whi5 reporter is integrated, cell cycle data can be automated; for now, this too must be added manually
-            cycles = curr_life(l,4:end);
+            %Plot cell cycle data as vertical lines
             y1 = get(gca,'ylim'); % height of cell cycle bar
             for k = cycles
                 line([k k],y1,'Color','k','LineStyle','--')
@@ -113,5 +116,9 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
         subplot_num = subplot_num + num_cells;
 
     end
+
+    % % Get all axes handles; set y-limits of all axes
+    % axh = findall(gcf,'type','axes');
+    % set(axh,'ylim',[0 10000])
 
 end
