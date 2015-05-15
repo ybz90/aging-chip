@@ -32,7 +32,7 @@
 
 
 //Import manually set variable configuration
-directory = "/Volumes/Data HD/Workspace/20150429_NTS2/";
+directory = "/Volumes/Data HD/Workspace/20150416_NTS2-GFP_number 2 and 8/";
 
 config = File.openAsString(directory+"run_preprocess_config.txt");
 config = split(config,"\n"); //split each line of config
@@ -74,7 +74,7 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 	}
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_t.tif");
 	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"/]");
-	/*
+	
 	//Create threshold from phase
 	setAutoThreshold("Default");
 	setThreshold(thrsh1, thrsh2);
@@ -118,7 +118,7 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 	saveAs("Tiff", directory+"/xy"+xy+"/xy"+xy+"_"+cname+"_thr_t.tif");
 	run("Image Sequence... ", "format=TIFF start=1 save=["+directory+"/xy"+xy+"/"+cname+"_thr/]");
 	selectWindow("Results");
-	*/
+	
 	run("Close All");
 }
 

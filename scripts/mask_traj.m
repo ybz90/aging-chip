@@ -160,7 +160,7 @@ function mask_traj(pos,imN,colN,fluN)
             % Get the mask of the mother cell only for this column
             % bwlabel does column-wise search by default; so to do row-wise searching for the lowest object, we transpose the BW3 binary image input and then transpose back the output of bwlabel
             BW4 = BW3.';
-            % ADD A STEP TO BWAREAOPEN REMOVE VERY TINY OBJECTS ARTIFACTS BUT NOT TOO SMALL IN CASE THERE ARE MINISCULE NUCLEAR MARKERS BARELY DETECTED
+            BW4 = bwareaopen(BW4,10); % Remove tiny objects/artifacts, BUT be careful not to accidentally remove mother masks that are very small!
             [L,num] = bwlabel(BW4); %
 
             if num == 0 %if there is no cells in the column, use a pure black, empty column (all zeros)
@@ -192,9 +192,10 @@ function mask_traj(pos,imN,colN,fluN)
                 curr_mother_x = mother_prop(1).Centroid(1); %current mother mask's centroids
                 curr_mother_y = mother_prop(1).Centroid(2);
 
-               % (1) the previous y-centroid is 0, meaning there is no mother cell yet detected; (2) the y-centroid of the current mother cell moves downward; and (3) the current y-centroid moves up within an acceptable range
-                y_allow = 10; %allowable vertical distance upwards from previous y-centroid
-                if (mother_y(i) == 0 | curr_mother_y > mother_y(i) | curr_mother_y + 10 >= mother_y(i))
+               % (1) the previous y-centroid is 0, meaning there is no mother cell yet detected; and (2) the current y-centroid moves up within an acceptable range up and down from the previous y-centroid
+                y_up_allow = 10; %allowable vertical distance upwards from previous y-centroid
+                y_down_allow = 100;
+                if (mother_y(i) == 0 | curr_mother_y < mother_y(i) + y_down_allow && curr_mother_y + y_up_allow >= mother_y(i))
                     mother_x(i) = curr_mother_x; %update centroids
                     mother_y(i) = curr_mother_y;
                     mother_BW{i} = temp_mother; %update mother_BW for current col
