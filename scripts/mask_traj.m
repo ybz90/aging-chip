@@ -6,6 +6,8 @@ function mask_traj(pos,imN,colN,fluN)
     % Record the mother cell's position and fluorescence for all channels; and xy_pos and trap #.
     % Export masks and mask+phase overlay images.
 
+    % By convention, the last fluorescence channel will always be the nuclear marker channel.
+
     % Yuan Zhao 05/15/2015
 
 
@@ -49,7 +51,7 @@ function mask_traj(pos,imN,colN,fluN)
         ph_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
         I_ph = imread(ph_name);
 
-        nuc_name = ['xy',pos,'/c3/xy',pos,'_c3_t',sprintf('%04g',imid),'.tif'];
+        nuc_name = ['xy',pos,'/c',num2str(fluN+1),'/xy',pos,'_c',num2str(fluN+1),'_t',sprintf('%04g',imid),'.tif'];
         I_nuc = imread(nuc_name);
 
         % Input directory and image paths for every fluorescent channel
@@ -229,7 +231,7 @@ function mask_traj(pos,imN,colN,fluN)
                 % Top 50 fluorescence method #1: Take the top half of the values in the array
                 col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
                 num_px = numel(col_prop_3); %number of pixels (area) of mother cell
-                top_50 = floor(0.5*num_px+1):num_px; % top 50% range
+                top_50 = floor(0.8*num_px+1):num_px; % top 50% range
                 col_prop_4 = mean(col_prop_3(top_50)); %
 
                 % % Top 50 fluorescence method #2: Find avg of min/max, and take the values above this threshold

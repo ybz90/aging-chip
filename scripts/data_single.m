@@ -83,13 +83,13 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
             title(cell_title);
             hold on
 
-            % %Plot cell cycle data as vertical lines; get the cell cycle data from the lifespan file
-            % %NOTE: Once Whi5 reporter is integrated, cell cycle data can be automated; for now, this too must be added manually
-            % cycles = curr_life(l,4:end)
-            % y1 = get(gca,'ylim'); % height of cell cycle bar
-            % for k = cycles
-            %     line([k k],y1,'Color','k','LineStyle','--')
-            % end
+            %Plot cell cycle data as vertical lines; get the cell cycle data from the lifespan file
+            %NOTE: Once Whi5 reporter is integrated, cell cycle data can be automated; for now, this too must be added manually
+            cycles = curr_life(l,4:end);
+            y1 = get(gca,'ylim'); % height of cell cycle bar
+            for k = cycles
+                line([k k],y1,'Color','k','LineStyle','--')
+            end
 
             % % Plot every other fluorescent channel...
             % for flu = 2:sz(3)

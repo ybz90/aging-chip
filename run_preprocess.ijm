@@ -32,7 +32,7 @@
 
 
 //Import manually set variable configuration
-directory = "/Volumes/Data HD/Workspace/20150416_NTS2-GFP_number 2 and 8/";
+directory = "/Volumes/Data HD/Workspace/20150506_NTS1_NTS2_with or without NAM/";
 
 config = File.openAsString(directory+"run_preprocess_config.txt");
 config = split(config,"\n"); //split each line of config
