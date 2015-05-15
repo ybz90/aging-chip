@@ -5,7 +5,7 @@ function plot_data(colN,pos_str)
 
     % Basically, this function is a wrapper for the individual plotting scripts based on it. It horizontally concatenates every position's trajectories into all_traj; it also adds the manually curated lifespan data into a cell matrix, with the data being a cell for every position.
 
-    % Yuan Zhao 05/14/2015
+    % Yuan Zhao 05/15/2015
 
 
     % Array for storing all trajectory data across all cells

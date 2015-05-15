@@ -6,11 +6,11 @@ function mask_traj(pos,imN,colN,fluN)
     % Record the mother cell's position and fluorescence for all channels; and xy_pos and trap #.
     % Export masks and mask+phase overlay images.
 
-    % Yuan Zhao 05/13/2015
+    % Yuan Zhao 05/15/2015
 
 
-    % Create output directory for storing masks
-    mkdir(strcat('xy',pos,'/mask'))
+    % % Create output directory for storing masks
+    % mkdir(strcat('xy',pos,'/mask'))
     % Create output directory for storing mask+phase overlays
     mkdir(strcat('xy',pos,'/mask_overlay'))
     % Create output directory for storing mother mask+phase overlays
