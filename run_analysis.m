@@ -33,8 +33,8 @@ fprintf('Processing %d frames.\n', imN);
 
 for i = 1:posn
     curr_pos = pos{i};
-    fprintf('Registering frames for position xy%d.\n', pos{i});
-    register_frames(pos{i},imN)
+    fprintf('Registering frames for position xy%d.\n', str2num(curr_pos));
+    register_frames(curr_pos,imN)
 end
 
 %

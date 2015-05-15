@@ -5,34 +5,23 @@ function plot_data(colN,pos_str)
 
     % Basically, this function is a wrapper for the individual plotting scripts based on it. It horizontally concatenates every position's trajectories into all_traj; it also adds the manually curated lifespan data into a cell matrix, with the data being a cell for every position.
 
-    % Yuan Zhao 05/11/2015
+    % Yuan Zhao 05/14/2015
 
-
-    % Convert input positions (pos from run_analysis.m) to numbers from strings
-    positions = [];
-    for g = 1:numel(pos_str)
-        positions(g) = str2num(pos_str{g});
-    end
 
     % Array for storing all trajectory data across all cells
-    all_traj = [];
+    all_traj = cell(1,numel(pos_str));
     % Array for storing manually curated lifespan data
-    all_lifespan = cell(1,numel(positions));
+    all_lifespan = cell(1,numel(pos_str));
 
     % For every position...
-    for i = positions
-        % Rename single digit positions to double accordingly
-        if numel(i) == 1
-            pos = ['0',num2str(i)];
-        else
-            pos = num2str(i);
-        end
+    for i = 1:numel(pos_str)
+        pos = pos_str{i};
 
         % Horizontally concatenate traj matrices for every position, forming a super array with dimensions:
         % # of frames x # of cells/traps (from all positions) x # of fluorescent channel
         traj_file = ['xy',pos,'/xy',pos,'_traj.mat'];
         load(traj_file);
-        all_traj = horzcat(all_traj,traj);
+        all_traj{i} = traj;
 
         % Import manually curated lifespan data for each cell in each position
         % Add lifespan data to all_lifespan cell array (1 x num pos), where each position's lifespan data is an array with dim:
