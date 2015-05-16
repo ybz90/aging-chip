@@ -1,33 +1,6 @@
 /*
  * ImageJ Macro for automatic image stack processing
  * Yuan Zhao 05/04/2015
- *
- * Manual steps:
- * 0) Place input image stacks in directory/data/ folder
- * 1) MANUALLY set the following variables as rows in run_preprocess_config.txt, place in directory/ folder
- *    a) xy; positions to process (ie 01,02,03,...)
- *    b) rot; angle to be rotated for each xy, measured from phase channel where + is CW and - is CCW (ie -0.74,-0.6,...)
- *    c) start, end; range of 'good' frames to keep; must be consistent across all positions (ie 1,796)
- *    d) reverse; 1 if stack needs to be vertically flipped so traps face "up" (ie 1,1,0,1,...)
- *    e) thrsh1, thrsh2; lower and upper threshold limits (ie 500,1500)
- *    f) phase_ch_prefix; phase channel prefix (ie c1)
- *    g) flu_ch_prefix; all fluorescent channel prefixes (ie c2,c3,...)
- *
- * Fluorescent channel macro:
- * 1) Duplicate raw stack, make substack based on start/end frames
- * 2) Rotate image stack, flip vertically if necessary
- * 3) Substract background
- * 4) Save fluorescent stack as .tif, export frames individually
- *
- * Phase channel / threshold macro:
- * 1) Duplicate raw stack, make substack based on start/end frames
- * 2) Rotate image stack, flip vertically if necessary
- * 3) Save phase stack as .tif, export frames individually
- * 4) Threshold based on thrsh1, thrsh2 parameters; apply mask
- * 5) Analyze particles to find bounding rectangle(s) of chip/trap features; use the upper bound & height of
- *    bounding rectangle to clear the area above/below, and fill the holes in rectangles above/below traps
- * 6) Save threshold stack as .tif, export frames individually
- *
  */
 
 

@@ -71,7 +71,7 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
             num_cycles = numel(cycles); %replicative life span (# of buds) for current cell, after 0s are removed
 
             % Define current style, based on num budding cycles and colormap from above
-            curr_style_idx = ceil((num_cycles/(max_cycles))*style_num)
+            curr_style_idx = ceil((num_cycles/(max_cycles))*style_num);
             curr_style = styles(curr_style_idx,:);
 
 
