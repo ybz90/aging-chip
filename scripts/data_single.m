@@ -1,12 +1,8 @@
 function data_single(colN,pos_str,all_traj,all_lifespan)
 
-    % For now, we are also manually curating the cell cycle count, but once the Whi5 reporter is integrated, this can be automatically determined based on its localization.
     % Plots trajectories for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding.
 
     % Yuan Zhao 05/15/2015
-
-    % TO DO: Set consistent axes for comparison
-    % TO DO: Instead of plotting all cells 1-7, only plot the ones in the lifespan.txt config file
 
 
     % Figure for containing subplots of traces for each cell

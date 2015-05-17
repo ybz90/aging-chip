@@ -1,12 +1,6 @@
 function mask_traj(pos,imN,colN,fluN)
 
     % mask_traj.m is used to generate a mask from the nuclear marker images and produce trajectories for the mother cells in each trap.
-    % The image is divided into colN slices for each trap as columns.
-    % Each column has a mask generated, and the cell with the lowest y-coord is identified as the mother cell.
-    % Record the mother cell's position and fluorescence for all channels; and xy_pos and trap #.
-    % Export masks and mask+phase overlay images.
-
-    % By convention, the last fluorescence channel will always be the nuclear marker channel.
 
     % Yuan Zhao 05/15/2015
 
