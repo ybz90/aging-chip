@@ -13,7 +13,7 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
     min_cycles = cell(1,numel(all_lifespan));
     for c = 1:numel(pos_str)
         curr_life = all_lifespan{c};
-        max_cycles{c} = numel(curr_life(1,4:end));
+        max_cycles{c} = numel(curr_life(1,5:end));
     end
     max_cycles = max(cell2mat(max_cycles));
 
@@ -54,13 +54,13 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             subplot(ceil(num_cell_all/gridcol),gridcol,subplot_num+l); % (rows,cols,current position); rows = num_cell_all/gridcol rounded up; current position is the running total of subplots so far, up to this frame, plus the num of the current cell in this frame
 
             % Frames across which the current cell is alive, from manual curation of movies
-            life_end = curr_life(l,3); % third column of appropriate lifespan data
-            life_start = curr_life(l,2); % second col
+            life_end = curr_life(l,4); % third column of appropriate lifespan data
+            life_start = curr_life(l,3); % second col
             X = life_start:life_end; % lifespan range
 
             % Get number of budding cycles from the curr_life data
             %NOTE: Once Whi5 reporter is integrated, cell cycle data can be automated; for now, this too must be added manually
-            cycles = curr_life(l,4:end); %budding frames for the current cell
+            cycles = curr_life(l,5:end); %budding frames for the current cell
             cycles = cycles(cycles>0); %remove all 0 entries in the cycles array
             num_cycles = numel(cycles); %replicative life span (# of buds) for current cell, after 0s are removed
 
@@ -74,14 +74,26 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             curr_trace = curr_traj(X,cell_ID,flu_1); % get current cell's fluorescence intensity values across X
 
             ax1 = gca; % get information for first axes, as reference for other flu channel axes
-            plot(X,curr_trace,'Color',curr_style,'LineWidth',1);
+            plot(X,curr_trace,'Color',curr_style,'LineWidth',1.5);
+
             xlabel(ax1,'Time in frames');
             ylabel(ax1,label_array(1));
             cell_title = ['Position ',pos,', Cell # ',num2str(cell_ID),'; Replicative Lifespan: ',num2str(num_cycles)];
             title(cell_title);
             hold on
 
-            %Plot cell cycle data as vertical lines
+            % Plot cell death type marker; 1 = popped out, 2 = abnormal death, 3 = normal death
+            if curr_life(l,2) == 1 % x
+                plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor',curr_style,'Markersize',12,'LineWidth',3)
+            end
+            if curr_life(l,2) == 2 % circle
+                plot(life_end,curr_trace(life_end-life_start+1),'o','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+            end
+            if curr_life(l,2) == 3 % square
+                plot(life_end,curr_trace(life_end-life_start+1),'s','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+            end
+
+            % Plot cell cycle data as vertical lines
             y1 = get(gca,'ylim'); % height of cell cycle bar
             for k = cycles
                 line([k k],y1,'Color','k','LineStyle','--')
@@ -95,7 +107,7 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
                 flu = flu_array(i);
                 curr_trace = curr_traj(X,cell_ID,flu);
 
-                P = plot(X,curr_trace,'Color',curr_style,'LineWidth',1);
+                P = plot(X,curr_trace,'Color','k','LineWidth',1);
 
                 axis(curr_ax, 'off', 'tight');
                 ylabel(curr_ax,label_array(i));

@@ -43,6 +43,7 @@ end
 % % Input the number of traps per image
 % colN = input('Input # of traps: ');
 colN = 7;
+
 % Input the number of fluorescent channels to analyze
 fluN = input('Input # of fluorescent channels: ');
 
@@ -56,12 +57,12 @@ end
 %% Visualization
 
 % Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
-flu_array = input('Input fluorescent channels to plot [1 2 ...]: ');
+flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
 
-% Input labels
-%label_array = input('Input fluorescent channel labels {GFP,irFP,etc.}'); 
-label_array = {'GFP'};
+% Input fluorescent channel labelslabels
+%label_array = input('Fluorescent channel labels {GFP,irFP,etc.}'); 
+label_array = {'GFP','mCherry'};
 
 plot_data(colN,pos,flu_array,label_array)
 
-
+%
