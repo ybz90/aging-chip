@@ -30,7 +30,7 @@ function plot_data(colN,pos_str)
     % Run plotting scripts here
 
     % Individual subplots for every trajectory
-    data_single(pos_str,8,all_traj,all_lifespan)
+    data_single(pos_str,6,all_traj,all_lifespan)
 
     % All trajectories together on a single plot
     %data_all(colN,pos_str,all_traj,all_lifespan)

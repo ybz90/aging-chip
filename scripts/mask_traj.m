@@ -149,17 +149,17 @@ function mask_traj(pos,imN,colN,fluN)
                 %[mother_prop(1),min(areas),max(areas),num_tries] %debug
             end
 
-            %NOTE: Remove all cells below a certain area, to remove the artifacts.
-            %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios. Then we can do binary watershed or something similar and take the lower most object as the mother.
-
 
             % Get the mask of the mother cell only for this column
             % bwlabel does column-wise search by default; so to do row-wise searching for the lowest object, we transpose the BW3 binary image input and then transpose back the output of bwlabel
             BW4 = BW3.';
             BW4 = bwareaopen(BW4,10); % Remove tiny objects/artifacts, BUT be careful not to accidentally remove mother masks that are very small!
+
+            %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios. Then we can do binary watershed or something similar and take the lower most object as the mother.
+
             [L,num] = bwlabel(BW4); %
 
-            if num == 0 %if there is no cells in the column, use a pure black, empty column (all zeros)
+            if num == 0 %if there are no cells in the column, use a pure black, empty column (all zeros)
                 temp_mother = zeros(height,block);
             else
                 temp_mother = (L==num); %image is only the mask of the mother cell
@@ -222,10 +222,10 @@ function mask_traj(pos,imN,colN,fluN)
                 % Structure for holding the cell fluorescence and other property data for all cells
                 col_prop_2 = [col_prop(:).PixelValues];%the values of all the pixels in the mother cell mask
 
-                % Top 50 fluorescence method #1: Take the top half of the values in the array
+                % Top 80 fluorescence method #1: Take the top half of the values in the array
                 col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
                 num_px = numel(col_prop_3); %number of pixels (area) of mother cell
-                top_50 = floor(0.8*num_px+1):num_px; % top 50% range
+                top_50 = floor(0.9*num_px+1):num_px; % top 50% range
                 col_prop_4 = mean(col_prop_3(top_50)); %
 
                 % % Top 50 fluorescence method #2: Find avg of min/max, and take the values above this threshold

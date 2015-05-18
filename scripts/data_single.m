@@ -71,9 +71,9 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan)
 
 
             % Plot the first fluorescent channel
-            curr_flu_val = curr_traj(X,cell_ID,1); % get current cell's fluorescence intensity values across X
-            flu_vals{1} = curr_flu_val; % add to flu_vals array
-            curr_trace = cell2mat(flu_vals(1));
+            curr_flu_val = curr_traj(X,cell_ID,2); % get current cell's fluorescence intensity values across X
+            flu_vals{2} = curr_flu_val; % add to flu_vals array
+            curr_trace = cell2mat(flu_vals(2));
 
             ax1 = gca; % get information for first axes, as reference for other flu channel axes
             plot(X,curr_trace,'Color',curr_style,'LineWidth',1);

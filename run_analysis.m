@@ -28,7 +28,7 @@ fprintf('Processing %d frames.\n', imN);
 %imN = input('Number of frames to process: ');
 
 %
-%% (OPTIONAL) REGISTER ALL FRAMES
+%% (OPTIONAL) Register frames
 % If there is microscape stage shake or drift, register frames of all positions to adjust for this movement. Use only if necessary.
 
 for i = 1:posn
