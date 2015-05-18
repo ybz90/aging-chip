@@ -1,4 +1,4 @@
-function data_single(colN,pos_str,all_traj,all_lifespan)
+function data_single(pos_str,gridcol,all_traj,all_lifespan)
 
     % Plots trajectories for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding.
 
@@ -51,7 +51,6 @@ function data_single(colN,pos_str,all_traj,all_lifespan)
             cell_ID = curr_life(l,1); %the trap in which the current cell is actually located, as not every cell is to be plotted and has info in curr_life
 
             % Initialize current subplot
-            gridcol = 8; % four subplots per row
             subplot(ceil(num_cell_all/gridcol),gridcol,subplot_num+l); % (rows,cols,current position); rows = num_cell_all/gridcol rounded up; current position is the running total of subplots so far, up to this frame, plus the num of the current cell in this frame
             flu_vals = [];  % store intensity values for all fluorescent channels
 
