@@ -1,8 +1,8 @@
-function data_single(pos_str,gridcol,all_traj,all_lifespan)
+function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
     % Plots trajectories for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding.
 
-    % Yuan Zhao 05/15/2015
+    % Yuan Zhao 05/18/2015
 
 
     % Figure for containing subplots of traces for each cell
@@ -52,7 +52,6 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan)
 
             % Initialize current subplot
             subplot(ceil(num_cell_all/gridcol),gridcol,subplot_num+l); % (rows,cols,current position); rows = num_cell_all/gridcol rounded up; current position is the running total of subplots so far, up to this frame, plus the num of the current cell in this frame
-            flu_vals = [];  % store intensity values for all fluorescent channels
 
             % Frames across which the current cell is alive, from manual curation of movies
             life_end = curr_life(l,3); % third column of appropriate lifespan data
@@ -70,15 +69,14 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan)
             curr_style = styles(curr_style_idx,:);
 
 
-            % Plot the first fluorescent channel
-            curr_flu_val = curr_traj(X,cell_ID,2); % get current cell's fluorescence intensity values across X
-            flu_vals{2} = curr_flu_val; % add to flu_vals array
-            curr_trace = cell2mat(flu_vals(2));
+            % Plot the first fluorescent channel in flu_array
+            flu_1 = flu_array(1);
+            curr_trace = curr_traj(X,cell_ID,flu_1); % get current cell's fluorescence intensity values across X
 
             ax1 = gca; % get information for first axes, as reference for other flu channel axes
             plot(X,curr_trace,'Color',curr_style,'LineWidth',1);
             xlabel(ax1,'Time in frames');
-            ylabel(ax1,'GFP');
+            ylabel(ax1,label_array(1));
             cell_title = ['Position ',pos,', Cell # ',num2str(cell_ID),'; Replicative Lifespan: ',num2str(num_cycles)];
             title(cell_title);
             hold on
@@ -89,21 +87,20 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan)
                 line([k k],y1,'Color','k','LineStyle','--')
             end
 
-            % % Plot every other fluorescent channel...
-            % for flu = 2:sz(3)
-            %     % Add axis for current flu channel
-            %     curr_ax = axes('Position',get(ax1,'Position'), 'Layer','bottom', 'XAxisLocation','top', 'YAxisLocation','right', 'XColor','k', 'YColor',styles(flu));
+            % Plot every other fluorescent channel in flu_array...
+            for i = 2:numel(flu_array)
+                % Add axis for current flu channel
+                curr_ax = axes('Position',get(ax1,'Position'), 'Layer','bottom', 'XAxisLocation','top', 'YAxisLocation','right', 'XColor','k', 'YColor','k');
 
-            %     curr_flu_val = all_traj(X,j,flu);
-            %     flu_vals{flu} = curr_flu_val;
-            %     curr_trace = cell2mat(flu_vals(flu));
+                flu = flu_array(i);
+                curr_trace = curr_traj(X,cell_ID,flu);
 
-            %     P = plot(X,curr_trace,styles(flu));
+                P = plot(X,curr_trace,'Color',curr_style,'LineWidth',1);
 
-            %     axis(curr_ax, 'off', 'tight');
-            %     ylabel(curr_ax,'iRFP (nuclear)');
-            % end
-            % hold off
+                axis(curr_ax, 'off', 'tight');
+                ylabel(curr_ax,label_array(i));
+            end
+            hold off
 
         end
 

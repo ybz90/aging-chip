@@ -1,8 +1,8 @@
-function plot_data(colN,pos_str)
+function plot_data(colN,pos_str,flu_array,label_array)
 
     % This function is a wrapper for the individual plotting scripts based on it. It loads every position's trajectories into all_traj and the manually curated lifespan data into all_lifespan.
 
-    % Yuan Zhao 05/15/2015
+    % Yuan Zhao 05/18/2015
 
 
     % Array for storing all trajectory data across all cells
@@ -31,7 +31,7 @@ function plot_data(colN,pos_str)
 
     % Individual subplots for every trajectory
     gridcol = 6; %indicate number of columns of subplots
-    data_single(pos_str,gridcol,all_traj,all_lifespan)
+    data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
     % All trajectories together on a single plot
     %data_all(colN,pos_str,all_traj,all_lifespan)
