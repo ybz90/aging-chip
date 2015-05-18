@@ -225,10 +225,10 @@ function mask_traj(pos,imN,colN,fluN)
                 % Top 80 fluorescence method #1: Take the top half of the values in the array
                 col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
                 num_px = numel(col_prop_3); %number of pixels (area) of mother cell
-                top_50 = floor(0.9*num_px+1):num_px; % top 50% range
+                top_50 = floor(0.8*num_px+1):num_px; % top 50% range
                 col_prop_4 = mean(col_prop_3(top_50)); %
 
-                % % Top 50 fluorescence method #2: Find avg of min/max, and take the values above this threshold
+                % % Top 50 fluorescence method #2: Find midpoint of min/max, and take the values above this threshold
                 % mi_px = min(col_prop_2); ma_px = max(col_prop_2);
                 % avg_px = (ma_px - mi_px)*0.5 + mi_px;
                 % col_prop_3 = col_prop_2(col_prop_2 > avg_px);
