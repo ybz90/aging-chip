@@ -59,7 +59,7 @@ end
 % Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
 flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
 
-% Input fluorescent channel labelslabels
+% Input fluorescent channel labels
 %label_array = input('Fluorescent channel labels {GFP,irFP,etc.}'); 
 label_array = {'GFP','mCherry'};
 

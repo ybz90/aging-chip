@@ -28,7 +28,9 @@ function mask_traj(pos,imN,colN,fluN)
     block = round(width/colN);
 
     % Store the centroids and column masks of each mother cell
-    mother_x = zeros(1,colN);
+    for w = 1:colN
+        mother_x(w) = block/2; %initialize with x-centroid right in the middle of block
+    end
     mother_y = zeros(1,colN);
     mother_BW = cell(1,colN); %initalize with completely blank columns
     for p = 1:colN
@@ -45,6 +47,7 @@ function mask_traj(pos,imN,colN,fluN)
         ph_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
         I_ph = imread(ph_name);
 
+        % The nuclear marker channel is, by convention, the last fluorescent channel
         nuc_name = ['xy',pos,'/c',num2str(fluN+1),'/xy',pos,'_c',num2str(fluN+1),'_t',sprintf('%04g',imid),'.tif'];
         I_nuc = imread(nuc_name);
 
@@ -188,10 +191,11 @@ function mask_traj(pos,imN,colN,fluN)
                 curr_mother_x = mother_prop(1).Centroid(1); %current mother mask's centroids
                 curr_mother_y = mother_prop(1).Centroid(2);
 
-               % (1) the previous y-centroid is 0, meaning there is no mother cell yet detected; and (2) the current y-centroid moves up within an acceptable range up and down from the previous y-centroid
+               % (1) the previous y-centroid is 0, meaning there is no mother cell yet detected; and (2) the current y-centroid moves up within an acceptable range up and down from the previous y-centroid; and (3) the current x-centroid moves left/right within range
                 y_up_allow = 10; %allowable vertical distance upwards from previous y-centroid
-                y_down_allow = 100;
-                if (mother_y(i) == 0 | curr_mother_y < mother_y(i) + y_down_allow && curr_mother_y + y_up_allow >= mother_y(i))
+                y_down_allow = 75;
+                x_allow = 15; %allow centroids to move horizontally up to 12px
+                if (mother_y(i) == 0 | curr_mother_y < mother_y(i) + y_down_allow && curr_mother_y + y_up_allow >= mother_y(i) && abs(curr_mother_x-mother_x(i)) <= x_allow )
                     mother_x(i) = curr_mother_x; %update centroids
                     mother_y(i) = curr_mother_y;
                     mother_BW{i} = temp_mother; %update mother_BW for current col

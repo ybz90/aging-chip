@@ -5,7 +5,7 @@
 
 
 //Import manually set variable configuration
-directory = "/Volumes/Data HD/Workspace/20150506_NTS1_NTS2_with or without NAM/";
+directory = "/Volumes/Work HD/aging/20150506_NTS1_NTS2_with or without NAM/";
 
 config = File.openAsString(directory+"run_preprocess_config.txt");
 config = split(config,"\n"); //split each line of config
@@ -99,8 +99,9 @@ function processPhTh(xy,rot,start,end,reverse,thrsh1,thrsh2,directory,cname) {
 
 ///////////////////
 // Initialize empty xy_pos/channel/raw folders
-ph_thrsh_prefix = newArray(phase_ch_prefix,phase_ch_prefix+"_thr"); // add _thr to phase channel prefix for threshold prefix
-folders = Array.concat(ph_thrsh_prefix,flu_ch_prefix); //concat ph, thrsh prefixes with flu channel prefixes; use this array for folder names
+//ph_thrsh_prefix = newArray(phase_ch_prefix,phase_ch_prefix+"_thr"); // add _thr to phase channel prefix for threshold prefix
+//folders = Array.concat(ph_thrsh_prefix,flu_ch_prefix); //concat ph, thrsh prefixes with flu channel prefixes; use this array for folder names
+folders = Array.concat(phase_ch_prefix,flu_ch_prefix);
 //Array.print(folders);
 for (i = 0; i<xyarray.length; i++) { //for every position in 1D xyarray
 	xy = xyarray[i];

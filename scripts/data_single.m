@@ -5,9 +5,6 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
     % Yuan Zhao 05/18/2015
 
 
-    % Figure for containing subplots of traces for each cell
-    figure;
-
     % Min/max replicative lifespan of all cells; used to determine a gradient range for plot style color
     max_cycles = cell(1,numel(all_lifespan)); % the highest # of rep life cycles for each position to be plotted; simply take the # of bud frames as the traps with fewer than the max will fill in a 0 anyway
     min_cycles = cell(1,numel(all_lifespan));
@@ -17,13 +14,6 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
     end
     max_cycles = max(cell2mat(max_cycles));
 
-    %styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
-    % Red to Black Colormap
-    styles = colormap(gray); % first col of gray has 64 rows; black is [0 0 0], red is [1 0 0]
-    styles = horzcat(styles(:,1),zeros(64,2)); %add first col of colormap(gray) to 64x2 mat of 0s
-    style_num = numel(styles(:,1)); %round(num_cycles/max_cycles)*style_num will translate lifespan of the cell into an index corresponding to the selected colormap
-
-
     % Total number of cells to be plotted
     num_cell_all = 0;
     for j = 1:numel(pos_str)
@@ -31,6 +21,16 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
         sz = size(curr_life);
         num_cell_all = num_cell_all + sz(1);
     end
+
+
+    % Figure for containing subplots of traces for each cell
+    figure;
+
+    %styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
+    % Red to Black Colormap
+    styles = colormap(gray); % first col of gray has 64 rows; black is [0 0 0], red is [1 0 0]
+    styles = horzcat(styles(:,1),zeros(64,2)); %add first col of colormap(gray) to 64x2 mat of 0s
+    style_num = numel(styles(:,1)); %round(num_cycles/max_cycles)*style_num will translate lifespan of the cell into an index corresponding to the selected colormap
 
     % Init running total of subplots
     subplot_num = 0;
@@ -74,7 +74,7 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             curr_trace = curr_traj(X,cell_ID,flu_1); % get current cell's fluorescence intensity values across X
 
             ax1 = gca; % get information for first axes, as reference for other flu channel axes
-            plot(X,curr_trace,'Color',curr_style,'LineWidth',1.5);
+            plot(X,curr_trace,'Color',curr_style,'LineWidth',1);
 
             xlabel(ax1,'Time in frames');
             ylabel(ax1,label_array(1));
@@ -84,7 +84,7 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
 
             % Plot cell death type marker; 1 = popped out, 2 = abnormal death, 3 = normal death
             if curr_life(l,2) == 1 % x
-                plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor',curr_style,'Markersize',12,'LineWidth',3)
+                plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor',curr_style,'Markersize',12,'LineWidth',2)
             end
             if curr_life(l,2) == 2 % circle
                 plot(life_end,curr_trace(life_end-life_start+1),'o','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
