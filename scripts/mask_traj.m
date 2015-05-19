@@ -239,11 +239,7 @@ function mask_traj(pos,imN,colN,fluN)
                 % col_prop_4 = mean(col_prop_3);
 
                 % Store mother cell fluorescence in trajectories matrix
-                if numel(mother_prop) == 0 %if no cells are present in the trap
-                    traj(imid,i,y) = 0; %store 0 as the fluorescence
-                else
-                    traj(imid,i,y) = col_prop_4;
-                end
+                traj(imid,i,y) = col_prop_4;
             end
         end
 
