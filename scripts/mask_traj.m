@@ -41,7 +41,7 @@ function mask_traj(pos,imN,colN,fluN)
     % For each frame...
     for imid = 1:imN
 
-        fprintf('Frame number %d has %d columns.\n', imid, colN); %debug
+        fprintf('Generating masks and trajectories for xy%s, frame %d.\n', pos, imid); %debug
 
         % Input directory and image paths for nuclear marker, fluorescence, and phase channel images
         ph_name = ['xy',pos,'/c1/xy',pos,'_c1_t',sprintf('%04g',imid),'.tif'];
@@ -229,7 +229,7 @@ function mask_traj(pos,imN,colN,fluN)
                 % Top 80 fluorescence method #1: Take the top half of the values in the array
                 col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
                 num_px = numel(col_prop_3); %number of pixels (area) of mother cell
-                top_50 = floor(0.8*num_px+1):num_px; % top 50% range
+                top_50 = floor(0.5*num_px+1):num_px; % top 50% range
                 col_prop_4 = mean(col_prop_3(top_50)); %
 
                 % % Top 50 fluorescence method #2: Find midpoint of min/max, and take the values above this threshold
