@@ -194,7 +194,7 @@ function mask_traj(pos,imN,colN,fluN)
                % (1) the previous y-centroid is 0, meaning there is no mother cell yet detected; and (2) the current y-centroid moves up within an acceptable range up and down from the previous y-centroid; and (3) the current x-centroid moves left/right within range
                 y_up_allow = 10; %allowable vertical distance upwards from previous y-centroid
                 y_down_allow = 75;
-                x_allow = 15; %allow centroids to move horizontally up to 12px
+                x_allow = 18; %allow centroids to move horizontally up to 12px
                 if (mother_y(i) == 0 | curr_mother_y < mother_y(i) + y_down_allow && curr_mother_y + y_up_allow >= mother_y(i) && abs(curr_mother_x-mother_x(i)) <= x_allow )
                     mother_x(i) = curr_mother_x; %update centroids
                     mother_y(i) = curr_mother_y;
