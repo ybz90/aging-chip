@@ -78,7 +78,7 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
 
             xlabel(ax1,'Time in frames');
             ylabel(ax1,label_array(1));
-            cell_title = ['Position ',pos,', Cell # ',num2str(cell_ID),'; Replicative Lifespan: ',num2str(num_cycles)];
+            cell_title = ['xy',pos,', Cell # ',num2str(cell_ID),': Replicative Lifespan = ',num2str(num_cycles)];
             title(cell_title);
             hold on
 
