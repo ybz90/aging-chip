@@ -167,41 +167,41 @@ function mask_traj(pos,imN,colN,fluN)
                 temp_mother = temp_mother.'; %transpose to orient axes correctly
             end
 
-            % % Declump non-circular mother cell masks, based on circularity
-            % p_a = regionprops(temp_mother,'Area','Perimeter');
-            % if ~isempty(p_a)
-            %     A = p_a(1).Area;
-            %     P = p_a(1).Perimeter;
-            %     pa_rat = (P^2)/(4*A*pi); %circularity; perfectly circular = 1
+            % Declump non-circular mother cell masks, based on circularity
+            p_a = regionprops(temp_mother,'Area','Perimeter');
+            if ~isempty(p_a)
+                A = p_a(1).Area;
+                P = p_a(1).Perimeter;
+                pa_rat = (P^2)/(4*A*pi); %circularity; perfectly circular = 1
 
-            %     % Binary watershed
-            %     if (pa_rat < 0.6 | pa_rat > 2)
-            %         D = bwdist(~temp_mother); % calculate distance matrix
-            %         D = -D;
-            %         %figure, imshow(D,[])
-            %         D(~temp_mother) = -Inf;
+                % Binary watershed
+                if (pa_rat < 0.6 | pa_rat > 2)
+                    D = bwdist(~temp_mother); % calculate distance matrix
+                    D = -D;
+                    %figure, imshow(D,[])
+                    D(~temp_mother) = -Inf;
 
-            %         L = watershed(D);
-            %         L2 = zeros(size(temp_mother));
-            %         dim = size(L);
-            %         for r = 1:dim(1)
-            %             for s = 1:dim(2)
-            %                 if (L(r,s) == 1 | L(r,s) == 0)
-            %                     L2(r,s) = 0;
-            %                 else
-            %                     L2(r,s) = 1;
-            %                 end
-            %             end
-            %         end
-            %         temp_mother = L2;
+                    L = watershed(D);
+                    L2 = zeros(size(temp_mother));
+                    dim = size(L);
+                    for r = 1:dim(1)
+                        for s = 1:dim(2)
+                            if (L(r,s) == 1 | L(r,s) == 0)
+                                L2(r,s) = 0;
+                            else
+                                L2(r,s) = 1;
+                            end
+                        end
+                    end
+                    temp_mother = L2;
 
-            %         % Once again, relabel to find the mother cell among the declumped cells
-            %         temp_mother = temp_mother';
-            %         [L,num] = bwlabel(temp_mother); %
-            %         temp_mother = (L==num);
-            %         temp_mother = temp_mother.';
-            %     end
-            % end
+                    % Once again, relabel to find the mother cell among the declumped cells
+                    temp_mother = temp_mother';
+                    [L,num] = bwlabel(temp_mother); %
+                    temp_mother = (L==num);
+                    temp_mother = temp_mother.';
+                end
+            end
 
             % Increase the size of the mother if it is too small
             mother_area = regionprops(temp_mother,'Area');
