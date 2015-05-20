@@ -28,16 +28,6 @@ fprintf('Processing %d frames.\n', imN);
 %imN = input('Number of frames to process: ');
 
 %
-%% (OPTIONAL) Register frames
-% If there is microscape stage shake or drift, register frames of all positions to adjust for this movement. Use only if necessary.
-
-for i = 1:posn
-    curr_pos = pos{i};
-    fprintf('Registering frames for position xy%d.\n', str2num(curr_pos));
-    register_frames(curr_pos,imN)
-end
-
-%
 %% Generate masks and cell trajectories
 
 tic 

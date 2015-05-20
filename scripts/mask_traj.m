@@ -2,7 +2,7 @@ function mask_traj(pos,imN,colN,fluN)
 
     % mask_traj.m is used to generate a mask from the nuclear marker images and produce trajectories for the mother cells in each trap.
 
-    % Yuan Zhao 05/15/2015
+    % Yuan Zhao 05/19/2015
 
 
     % % Create output directory for storing masks
@@ -158,8 +158,6 @@ function mask_traj(pos,imN,colN,fluN)
             BW4 = BW3.';
             BW4 = bwareaopen(BW4,10); % Remove tiny objects/artifacts, BUT be careful not to accidentally remove mother masks that are very small!
 
-            %NOTE: Add code for declumping cells; since we only care about the lowest mother cell, this will only be needed for cases where a mother and a daughter are still attached when the frame was taken, and so we can approach this using a noncircularity method to identify these scenarios. Then we can do binary watershed or something similar and take the lower most object as the mother.
-
             [L,num] = bwlabel(BW4); %
 
             if num == 0 %if there are no cells in the column, use a pure black, empty column (all zeros)
@@ -168,6 +166,42 @@ function mask_traj(pos,imN,colN,fluN)
                 temp_mother = (L==num); %image is only the mask of the mother cell
                 temp_mother = temp_mother.'; %transpose to orient axes correctly
             end
+
+            % % Declump non-circular mother cell masks, based on circularity
+            % p_a = regionprops(temp_mother,'Area','Perimeter');
+            % if ~isempty(p_a)
+            %     A = p_a(1).Area;
+            %     P = p_a(1).Perimeter;
+            %     pa_rat = (P^2)/(4*A*pi); %circularity; perfectly circular = 1
+
+            %     % Binary watershed
+            %     if (pa_rat < 0.6 | pa_rat > 2)
+            %         D = bwdist(~temp_mother); % calculate distance matrix
+            %         D = -D;
+            %         %figure, imshow(D,[])
+            %         D(~temp_mother) = -Inf;
+
+            %         L = watershed(D);
+            %         L2 = zeros(size(temp_mother));
+            %         dim = size(L);
+            %         for r = 1:dim(1)
+            %             for s = 1:dim(2)
+            %                 if (L(r,s) == 1 | L(r,s) == 0)
+            %                     L2(r,s) = 0;
+            %                 else
+            %                     L2(r,s) = 1;
+            %                 end
+            %             end
+            %         end
+            %         temp_mother = L2;
+
+            %         % Once again, relabel to find the mother cell among the declumped cells
+            %         temp_mother = temp_mother';
+            %         [L,num] = bwlabel(temp_mother); %
+            %         temp_mother = (L==num);
+            %         temp_mother = temp_mother.';
+            %     end
+            % end
 
             % Increase the size of the mother if it is too small
             mother_area = regionprops(temp_mother,'Area');
