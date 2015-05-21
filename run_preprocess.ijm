@@ -5,7 +5,7 @@
 
 
 //Import manually set variable configuration
-directory = "/Volumes/Work HD/aging/20150506_NTS1_NTS2_with or without NAM/";
+directory = "/Volumes/Work HD/aging/20150513_NH0285 test/";
 
 config = File.openAsString(directory+"run_preprocess_config.txt");
 config = split(config,"\n"); //split each line of config
