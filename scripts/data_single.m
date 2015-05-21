@@ -82,15 +82,18 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             title(cell_title);
             hold on
 
-            % Plot cell death type marker; 1 = popped out, 2 = abnormal death, 3 = normal death
-            if curr_life(l,2) == 1 % x
-                plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor',curr_style,'Markersize',12,'LineWidth',2)
+            % Plot cell death type marker; 1 = normal death (square); 2 = late daughter (triangle); 3 = escaped cells / popped out (x); 4 = abnormal (round) death (circle)
+            if curr_life(l,2) == 1 % square
+                plot(life_end,curr_trace(life_end-life_start+1),'s','MarkerEdgeColor',curr_style,'MarkerFaceColor',curr_style,'Markersize',12,'LineWidth',2)
             end
-            if curr_life(l,2) == 2 % circle
+            if curr_life(l,2) == 2 % triangle
+                plot(life_end,curr_trace(life_end-life_start+1),'^','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+            end
+            if curr_life(l,2) == 3 % x
+                plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+            end
+            if curr_life(l,2) == 4 % circle
                 plot(life_end,curr_trace(life_end-life_start+1),'o','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
-            end
-            if curr_life(l,2) == 3 % square
-                plot(life_end,curr_trace(life_end-life_start+1),'s','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
             end
 
             % Plot cell cycle data as vertical lines
