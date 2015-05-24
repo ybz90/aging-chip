@@ -5,6 +5,7 @@ function mask_traj(pos,imN,colN,fluN)
     % Yuan Zhao 05/19/2015
 
 
+    % INITIALIZATION %
     % % Create output directory for storing masks
     % mkdir(strcat('xy',pos,'/mask'))
     % % Create output directory for storing mask+phase overlays
@@ -38,9 +39,10 @@ function mask_traj(pos,imN,colN,fluN)
     end
 
 
-    % For each frame...
+    % FOR EACH FRAME... %
     for imid = 1:imN
 
+    % STEP 1: MASK GENERATION %
         fprintf('Generating masks and trajectories for xy%s, frame %d.\n', pos, imid); %debug
 
         % Input directory and image paths for nuclear marker, fluorescence, and phase channel images
@@ -74,12 +76,12 @@ function mask_traj(pos,imN,colN,fluN)
         end
 
 
-        % For each column in the current frame...
+        % FOR EACH COLUMN IN THE CURRENT FRAME... %
         for i = 1:colN
             Icf = I_nuc(:,1+(i-1)*block:i*block); %current column of nuclear marker image
             %figure; imagesc(I_nuc(:,1+(i-1)*block:i*block)) %debug
 
-
+            % INITIAL THRESHOLDING %
             % Otsu's threshold nuclear marker image to obtain binary column mask
             %[level EM] = graythresh(Icf);
             level = 0.05;
@@ -87,7 +89,6 @@ function mask_traj(pos,imN,colN,fluN)
             BW2 = imfill(BW,'holes');
             BW3 = imdilate(BW2, strel('disk',1)); %dilate mask with disk
             %figure; imshow(BW3) %debug
-
 
             mask_prop = regionprops(BW3,Icf,'Area','Centroid'); %areas and centroids of the cell masks for the current column
 
@@ -108,6 +109,8 @@ function mask_traj(pos,imN,colN,fluN)
             mother_prop = mask_prop_2(:,idx); %mother_prop(1) is the area of the mother cell
             areas = mask_prop_2(1,:);
 
+
+            % MASK OPTIMIZATION TO IDENTIFY HARD-TO-DETECT MOTHER CELLS %
             % If there are no cells detected via nuclear mask in this column, reduce threshold up to 3 times to try to detect them
             num_tries = 0;
             while isempty(mother_prop) && num_tries < 3
@@ -127,7 +130,6 @@ function mask_traj(pos,imN,colN,fluN)
                 areas = mask_prop_2(1,:);
             end
 
-            %num_tries = 0;
             % Check the following conditions to determine whether or not to further reduce the thresold level, thereby increasing the mask radius
             while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 35) && max(areas) < 150 && num_tries < 8
                 % Check that there is a mother cell identified
@@ -153,7 +155,7 @@ function mask_traj(pos,imN,colN,fluN)
             end
 
 
-            % Get the mask of the mother cell only for this column
+            % IDENTIFY THE MASK OF THE MOTHER CELL ONLY IN CURRENT COLUMN %
             % bwlabel does column-wise search by default; so to do row-wise searching for the lowest object, we transpose the BW3 binary image input and then transpose back the output of bwlabel
             BW4 = BW3.';
             BW4 = bwareaopen(BW4,10); % Remove tiny objects/artifacts, BUT be careful not to accidentally remove mother masks that are very small!
@@ -167,14 +169,16 @@ function mask_traj(pos,imN,colN,fluN)
                 temp_mother = temp_mother.'; %transpose to orient axes correctly
             end
 
-            % Declump non-circular mother cell masks, based on circularity
+
+            % DECLUMP NON-CIRCULAR MOTHER CELL MASKS %
+            % method based on circularity metric, where 1 is perfect circular
             p_a = regionprops(temp_mother,'Area','Perimeter');
             if ~isempty(p_a)
                 A = p_a(1).Area;
                 P = p_a(1).Perimeter;
-                pa_rat = (P^2)/(4*A*pi); %circularity; perfectly circular = 1
+                pa_rat = (P^2)/(4*A*pi); %circularity
 
-                % Binary watershed
+                % Binary watershed image segmentation
                 %if (pa_rat < 0.6 | pa_rat > 2)
                 if pa_rat > 1.5
                     D = bwdist(~temp_mother); % calculate distance matrix
@@ -182,10 +186,10 @@ function mask_traj(pos,imN,colN,fluN)
                     %figure, imshow(D,[])
                     D(~temp_mother) = -Inf;
 
-                    L = watershed(D);
+                    L = watershed(D); % watershed matrix has 1s as background, 0s as outline, and other values for the filled objects
                     L2 = zeros(size(temp_mother));
                     dim = size(L);
-                    for r = 1:dim(1)
+                    for r = 1:dim(1) % convert watershed mat to BW, turn all 1s and 0s to 0 for bg; all object fill values to 1
                         for s = 1:dim(2)
                             if (L(r,s) == 1 | L(r,s) == 0)
                                 L2(r,s) = 0;
@@ -194,27 +198,31 @@ function mask_traj(pos,imN,colN,fluN)
                             end
                         end
                     end
-                    temp_mother = L2;
+                    temp_mother = L2; %update temp_mother with segmented image
 
                     % Once again, relabel to find the mother cell among the declumped cells
                     temp_mother = temp_mother';
                     [L,num] = bwlabel(temp_mother); %
                     temp_mother = (L==num);
-                    temp_mother = temp_mother.';
+                    temp_mother = temp_mother.'; %the declumped mother cell mask
+                    temp_mother = imdilate(temp_mother, strel('disk',1));
                 end
             end
 
-            % Increase the size of the mother if it is too small
+
+            % INCREASE MOTHER CELL MASK IF TOO SMALL %
             mother_area = regionprops(temp_mother,'Area');
             if ~isempty(mother_area)
                 mother_area_2 = [mother_area(1).Area];
-                while mother_area_2 < 50
+                while mother_area_2 < 75
                     temp_mother = imdilate(temp_mother, strel('disk',1));
                     mother_area = regionprops(temp_mother,'Area');
                     mother_area_2 = [mother_area(1).Area];
                 end
             end
 
+
+            % COMPARE CURRENT MOTHER CENTROID v. PREVIOUS FRAME %
             % Find centroid of current col mother cell, update mother_x, mother_y, and mother_BW arrays IF the current mother cell meets the following criteria:
             mother_prop = regionprops(temp_mother,'centroid'); % find centroid of the current column mother cell
             if ~isempty(mother_prop) %if there is a mother cell in this particular column
@@ -233,6 +241,7 @@ function mask_traj(pos,imN,colN,fluN)
                 if (mother_y(i) == 0 | curr_mother_y < mother_y(i) + y_down_allow && curr_mother_y + y_up_allow >= mother_y(i) && abs(curr_mother_x-mother_x(i)) <= x_allow )
                     mother_x(i) = curr_mother_x; %update centroids
                     mother_y(i) = curr_mother_y;
+                    rollback_BW = mother_BW{i}; %temporarily stores previous mother_BW in case rollback required after checking a fluorescence channel
                     mother_BW{i} = temp_mother; %update mother_BW for current col
                 % if the current mother cell doesn't meet these criteria or there is no mother cell in the column, do not update the arrays and load the previous frame's mother_BW as the current temp_mother column mother mask
                 else
@@ -243,13 +252,19 @@ function mask_traj(pos,imN,colN,fluN)
             end
 
 
-            % % Add current column mask to the overall mask image for output
+            % CHECK CURRENT MASK FOR FLUORESCENCE %
+            % IF ABOVE THRESHOLD 500? MAX, ROLL BACK TO PREV TEMP_MOTHER, WHICH SHOULD BE SAVED IN PREV STEP AS SOME ROLLBACK VAR = MOTHER_BW{I}
+            % CHECK the SECOND TO LAST (ie last non-nuc, fluN - 1) channel
+
+
+            % ADD CURRENT COLUMN MASK TO OVERALL FRAME MASK IMAGE
             % I_nuc_mask = horzcat(I_nuc_mask,BW3);
             % Add current mother cell mask to the overall mother mask image
             I_mother_mask = horzcat(I_mother_mask,temp_mother);
 
 
-            % For each of the fluorescent channels...
+        % STEP 2: TRAJECTORY MEASUREMENT %
+            % FOR EVERY FLUORESCENT CHANNEL ... %
             for y = 1:fluN
                 curr_I_flu = I_flu{y}; % current fluorescent image
                 I_flu_col = curr_I_flu(:,1+(i-1)*block:i*block); % current column in flu image
@@ -261,7 +276,7 @@ function mask_traj(pos,imN,colN,fluN)
                 % Structure for holding the cell fluorescence and other property data for all cells
                 col_prop_2 = [col_prop(:).PixelValues];%the values of all the pixels in the mother cell mask
 
-                % Top 80 fluorescence method #1: Take the top half of the values in the array
+                % Top 30 fluorescence method #1: Take the top half of the values in the array
                 col_prop_3 = sort(col_prop_2); %sort PixelValues in ascending order
                 num_px = numel(col_prop_3); %number of pixels (area) of mother cell
                 top_50 = floor(0.7*num_px+1):num_px; % top 50% range
@@ -278,6 +293,8 @@ function mask_traj(pos,imN,colN,fluN)
             end
         end
 
+
+        % STEP 3: SAVE MASK IMAGE OUTPUTS AND TRAJECTORIES
         % % Output mask image
         % imwrite(I_nuc_mask, out_name);
         % %figure; imshow(I_nuc_mask);
