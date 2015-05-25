@@ -131,7 +131,8 @@ function mask_traj(pos,imN,colN,fluN)
             end
 
             % Check the following conditions to determine whether or not to further reduce the thresold level, thereby increasing the mask radius
-            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 35) && max(areas) < 150 && num_tries < 8
+            % NOTE: Essentially, we want to maximize the likelihood of capturing a mother cell mask while avoiding oversaturation, resulting in background artifacts. The mother cell only needs to be larger than the areaopen threshold in the next step.
+            while ~isempty(mother_prop) && (mother_prop(1) < 35 | min(areas) < 25) && max(areas) < 150 && num_tries < 8
                 % Check that there is a mother cell identified
                 % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
                 % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold
@@ -201,10 +202,13 @@ function mask_traj(pos,imN,colN,fluN)
                     temp_mother = L2; %update temp_mother with segmented image
 
                     % Once again, relabel to find the mother cell among the declumped cells
+                    %temp_mother = bwareaopen(temp_mother,3); %remove tiny segmented objects
                     temp_mother = temp_mother';
                     [L,num] = bwlabel(temp_mother); %
                     temp_mother = (L==num);
                     temp_mother = temp_mother.'; %the declumped mother cell mask
+
+                    temp_mother = bwmorph(bwconvhull(temp_mother), 'spur');
                     temp_mother = imdilate(temp_mother, strel('disk',1));
                 end
             end
