@@ -245,20 +245,27 @@ function mask_traj(pos,imN,colN,fluN)
                 if (mother_y(i) == 0 | curr_mother_y < mother_y(i) + y_down_allow && curr_mother_y + y_up_allow >= mother_y(i) && abs(curr_mother_x-mother_x(i)) <= x_allow )
                     mother_x(i) = curr_mother_x; %update centroids
                     mother_y(i) = curr_mother_y;
-                    rollback_BW = mother_BW{i}; %temporarily stores previous mother_BW in case rollback required after checking a fluorescence channel
                     mother_BW{i} = temp_mother; %update mother_BW for current col
                 % if the current mother cell doesn't meet these criteria or there is no mother cell in the column, do not update the arrays and load the previous frame's mother_BW as the current temp_mother column mother mask
                 else
-                    temp_mother = mother_BW{i}; %restore previous frame's mother cell col mask without updating the centroids
+                    % Before deciding to use the previous frame's mask, check to see if there is a cell using the prior mask; to do this, look at the second to last channel (last non-nuc flu, fluN-1) and see if the max val of that area is below the requisite threshold (1000)
+                    % If so, use the current temp_mother and update mother_x, y and mother_BW (this means there is no cell where the previous mask was, probably because the mother cell jumped up in the trap, or it died; in which case, we can now start tracking its nearest daughter)
+                    % If it is above the threshold, use the previous frame's mask
+                    check_I_flu = I_flu{fluN-1}; %second to last flu channel
+                    check_I_flu_col = check_I_flu(:,1+(i-1)*block:i*block); %current column in check flu channel
+                    max_flu = regionprops(mother_BW{i},check_I_flu_col,'MaxIntensity'); %find max of previous frame mother mask
+                    max_flu = [max_flu.MaxIntensity];
+                    if max_flu < 1000 %no cell, use temp_mother
+                        mother_x(i) = curr_mother_x;
+                        mother_y(i) = curr_mother_y;
+                        mother_BW{i} = temp_mother;
+                    else
+                        temp_mother = mother_BW{i}; %restore previous frame's mother cell col mask without updating the centroids
+                    end
                 end
             else %if there are no mother cells/centroids, use previous mother mask
                 temp_mother = mother_BW{i};
             end
-
-
-            % CHECK CURRENT MASK FOR FLUORESCENCE %
-            % IF ABOVE THRESHOLD 500? MAX, ROLL BACK TO PREV TEMP_MOTHER, WHICH SHOULD BE SAVED IN PREV STEP AS SOME ROLLBACK VAR = MOTHER_BW{I}
-            % CHECK the SECOND TO LAST (ie last non-nuc, fluN - 1) channel
 
 
             % ADD CURRENT COLUMN MASK TO OVERALL FRAME MASK IMAGE
