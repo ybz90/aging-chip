@@ -132,7 +132,7 @@ function mask_traj(pos,imN,colN,fluN)
 
             % Check the following conditions to determine whether or not to further reduce the thresold level, thereby increasing the mask radius
             % NOTE: Essentially, we want to maximize the likelihood of capturing a mother cell mask while avoiding oversaturation, resulting in background artifacts. The mother cell only needs to be larger than the areaopen threshold in the next step.
-            while ~isempty(mother_prop) && (mother_prop(1) < 35 | min(areas) < 25) && max(areas) < 150 && num_tries < 8
+            while ~isempty(mother_prop) && (mother_prop(1) < 45 | min(areas) < 35) && max(areas) < 150 && num_tries < 8
                 % Check that there is a mother cell identified
                 % Check if the mother cell is too small, OR if any other cell is also too small (this or statement deals with the scenario wherein the lowermost cell of the initial threshold may be sufficiently large to skip the while loop, but it is not the actual mother cell, which may not be detected that that thrsh level)
                 % Stop if the largest cell exceeds too large a size, as this could imply oversaturation during threshold
@@ -248,6 +248,9 @@ function mask_traj(pos,imN,colN,fluN)
                     mother_BW{i} = temp_mother; %update mother_BW for current col
                 % if the current mother cell doesn't meet these criteria or there is no mother cell in the column, do not update the arrays and load the previous frame's mother_BW as the current temp_mother column mother mask
                 else
+                    % %PREVIOUS CODE FOR NOT CHECKING CELL FLU
+                    % temp_mother = mother_BW{i}; %restore previous frame's mother cell col mask without updating the centroids
+
                     % Before deciding to use the previous frame's mask, check to see if there is a cell using the prior mask; to do this, look at the second to last channel (last non-nuc flu, fluN-1) and see if the max val of that area is below the requisite threshold (1000)
                     % If so, use the current temp_mother and update mother_x, y and mother_BW (this means there is no cell where the previous mask was, probably because the mother cell jumped up in the trap, or it died; in which case, we can now start tracking its nearest daughter)
                     % If it is above the threshold, use the previous frame's mask
@@ -255,7 +258,7 @@ function mask_traj(pos,imN,colN,fluN)
                     check_I_flu_col = check_I_flu(:,1+(i-1)*block:i*block); %current column in check flu channel
                     max_flu = regionprops(mother_BW{i},check_I_flu_col,'MaxIntensity'); %find max of previous frame mother mask
                     max_flu = [max_flu.MaxIntensity];
-                    if max_flu < 1000 %no cell, use temp_mother
+                    if max_flu < 500 %no cell, use temp_mother
                         mother_x(i) = curr_mother_x;
                         mother_y(i) = curr_mother_y;
                         mother_BW{i} = temp_mother;
