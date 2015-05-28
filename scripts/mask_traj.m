@@ -202,7 +202,6 @@ function mask_traj(pos,imN,colN,fluN)
                     temp_mother = L2; %update temp_mother with segmented image
 
                     % Once again, relabel to find the mother cell among the declumped cells
-                    %temp_mother = bwareaopen(temp_mother,3); %remove tiny segmented objects
                     temp_mother = temp_mother';
                     [L,num] = bwlabel(temp_mother); %
                     temp_mother = (L==num);
@@ -248,23 +247,22 @@ function mask_traj(pos,imN,colN,fluN)
                     mother_BW{i} = temp_mother; %update mother_BW for current col
                 % if the current mother cell doesn't meet these criteria or there is no mother cell in the column, do not update the arrays and load the previous frame's mother_BW as the current temp_mother column mother mask
                 else
-                    % %PREVIOUS CODE FOR NOT CHECKING CELL FLU
-                    % temp_mother = mother_BW{i}; %restore previous frame's mother cell col mask without updating the centroids
+                    temp_mother = mother_BW{i}; %restore previous frame's mother cell col mask without updating the centroids
 
-                    % Before deciding to use the previous frame's mask, check to see if there is a cell using the prior mask; to do this, look at the second to last channel (last non-nuc flu, fluN-1) and see if the max val of that area is below the requisite threshold (1000)
-                    % If so, use the current temp_mother and update mother_x, y and mother_BW (this means there is no cell where the previous mask was, probably because the mother cell jumped up in the trap, or it died; in which case, we can now start tracking its nearest daughter)
-                    % If it is above the threshold, use the previous frame's mask
-                    check_I_flu = I_flu{fluN-1}; %second to last flu channel
-                    check_I_flu_col = check_I_flu(:,1+(i-1)*block:i*block); %current column in check flu channel
-                    max_flu = regionprops(mother_BW{i},check_I_flu_col,'MaxIntensity'); %find max of previous frame mother mask
-                    max_flu = [max_flu.MaxIntensity];
-                    if max_flu < 500 %no cell, use temp_mother
-                        mother_x(i) = curr_mother_x;
-                        mother_y(i) = curr_mother_y;
-                        mother_BW{i} = temp_mother;
-                    else
-                        temp_mother = mother_BW{i}; %restore previous frame's mother cell col mask without updating the centroids
-                    end
+                    % % Before deciding to use the previous frame's mask, check to see if there is a cell using the prior mask; to do this, look at the second to last channel (last non-nuc flu, fluN-1) and see if the max val of that area is below the requisite threshold (1000)
+                    % % If so, use the current temp_mother and update mother_x, y and mother_BW (this means there is no cell where the previous mask was, probably because the mother cell jumped up in the trap, or it died; in which case, we can now start tracking its nearest daughter)
+                    % % If it is above the threshold, use the previous frame's mask
+                    % check_I_flu = I_flu{fluN-1}; %second to last flu channel
+                    % check_I_flu_col = check_I_flu(:,1+(i-1)*block:i*block); %current column in check flu channel
+                    % max_flu = regionprops(mother_BW{i},check_I_flu_col,'MaxIntensity'); %find max of previous frame mother mask
+                    % max_flu = [max_flu.MaxIntensity];
+                    % if max_flu < 500 %no cell, use temp_mother
+                    %     mother_x(i) = curr_mother_x;
+                    %     mother_y(i) = curr_mother_y;
+                    %     mother_BW{i} = temp_mother;
+                    % else
+                    %     temp_mother = mother_BW{i}; %restore previous frame's mother cell col mask without updating the centroids
+                    % end
                 end
             else %if there are no mother cells/centroids, use previous mother mask
                 temp_mother = mother_BW{i};
