@@ -31,7 +31,8 @@ function plot_data(colN,pos_str,flu_array,label_array)
 
     % Individual subplots for every trajectory
     gridcol = 6; %indicate number of columns of subplots
-    data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
+    %data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
+    data_multi(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
     % All trajectories together on a single plot
     %data_all(colN,pos_str,all_traj,all_lifespan)

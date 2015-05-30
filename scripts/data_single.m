@@ -1,8 +1,8 @@
 function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
-    % Plots trajectories for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding.
+    % Plots single fluorescent channel trajectory for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding. Also includes a marker at the end of the trace to signal cell death type.
 
-    % Yuan Zhao 05/18/2015
+    % Yuan Zhao 05/29/2015
 
 
     % Min/max replicative lifespan of all cells; used to determine a gradient range for plot style color
@@ -101,21 +101,6 @@ function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             for k = cycles
                 line([k k],y1,'Color','k','LineStyle','--')
             end
-
-            % Plot every other fluorescent channel in flu_array...
-            for i = 2:numel(flu_array)
-                % Add axis for current flu channel
-                curr_ax = axes('Position',get(ax1,'Position'), 'Layer','bottom', 'XAxisLocation','top', 'YAxisLocation','right', 'XColor','k', 'YColor','k');
-
-                flu = flu_array(i);
-                curr_trace = curr_traj(X,cell_ID,flu);
-
-                P = plot(X,curr_trace,'Color','k','LineWidth',1);
-
-                axis(curr_ax, 'off', 'tight');
-                ylabel(curr_ax,label_array(i));
-            end
-            hold off
 
         end
 
