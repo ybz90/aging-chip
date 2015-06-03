@@ -1,4 +1,4 @@
-function mask_traj(pos,imN,colN,fluN)
+function mask_traj(pos,imN,fluN)
 
     % mask_traj.m is used to generate a mask from the nuclear marker images and produce trajectories for the mother cells in each trap.
 
@@ -6,10 +6,12 @@ function mask_traj(pos,imN,colN,fluN)
 
 
     % INITIALIZATION %
+    colN = 7;
+
     % % Create output directory for storing masks
     % mkdir(strcat('xy',pos,'/mask'))
-    % % Create output directory for storing mask+phase overlays
-    % mkdir(strcat('xy',pos,'/mask_overlay'))
+    % Create output directory for storing mask+phase overlays
+    mkdir(strcat('xy',pos,'/mask_overlay'))
     % Create output directory for storing mother mask+phase overlays
     mkdir(strcat('xy',pos,'/mother_overlay'))
 
@@ -63,7 +65,7 @@ function mask_traj(pos,imN,colN,fluN)
 
         % Output directory and mask image name
         % out_name = ['xy',pos,'/mask/xy',pos,'_mask_t',sprintf('%04g',imid),'.tif'];
-        % out_name_overlay = ['xy',pos,'/mask_overlay/xy',pos,'_mask_overlay_t',sprintf('%04g',imid),'.tif'];
+        out_name_overlay = ['xy',pos,'/mask_overlay/xy',pos,'_mask_overlay_t',sprintf('%04g',imid),'.tif'];
         out_name_mother = ['xy',pos,'/mother_overlay/xy',pos,'_mother_overlay_t',sprintf('%04g',imid),'.tif'];
 
         % Initialize mask image for this frame
@@ -270,7 +272,7 @@ function mask_traj(pos,imN,colN,fluN)
 
 
             % ADD CURRENT COLUMN MASK TO OVERALL FRAME MASK IMAGE
-            % I_nuc_mask = horzcat(I_nuc_mask,BW3);
+            I_nuc_mask = horzcat(I_nuc_mask,BW3);
             % Add current mother cell mask to the overall mother mask image
             I_mother_mask = horzcat(I_mother_mask,temp_mother);
 
@@ -311,10 +313,10 @@ function mask_traj(pos,imN,colN,fluN)
         % imwrite(I_nuc_mask, out_name);
         % %figure; imshow(I_nuc_mask);
 
-        % % Output mask+phase overlay
-        % I_overlay = imfuse(I_ph,I_nuc_mask,'falsecolor','ColorChannels','red-cyan');
-        % %figure; imshow(I_overlay)
-        % imwrite(I_overlay, out_name_overlay)
+        % Output mask+phase overlay
+        I_overlay = imfuse(I_ph,I_nuc_mask,'falsecolor','ColorChannels','red-cyan');
+        %figure; imshow(I_overlay)
+        imwrite(I_overlay, out_name_overlay)
 
         % Output mother mask+phase overlay
         I_overlay_2 = imfuse(I_ph,I_mother_mask,'falsecolor','ColorChannels','red-cyan');

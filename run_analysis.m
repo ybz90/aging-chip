@@ -44,14 +44,6 @@ toc
 %
 %% Visualization
 
-% Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
-flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
-
-% Input fluorescent channel labels
-%label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
-label_array = {'GFP','mCherry'};
-
-
 % The following code is a wrapper for the individual plotting scripts based on it. It loads every position's trajectories into all_traj and the manually curated lifespan data into all_lifespan.
 
 % Array for storing all trajectory data across all cells
@@ -76,13 +68,22 @@ for i = 1:numel(pos)
     all_lifespan{i} = lifespan_file;
 end
 
+
+% Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
+flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
+
+% Input fluorescent channel labels
+%label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
+label_array = {'GFP','mCherry'};
+
+
 % Run plotting scripts here
 
 % Individual subplots for every trajectory
 gridcol = 6; %indicate number of columns of subplots
 
-%data_single(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
-data_multi(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
+data_single(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
+%data_multi(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
 
 %
