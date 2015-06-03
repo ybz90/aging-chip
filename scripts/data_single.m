@@ -1,6 +1,6 @@
-function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
+function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
-    % Plots trajectories for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding.
+    % Plots single fluorescent channel trajectory for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding. Also includes a marker at the end of the trace to signal cell death type.
 
     % Yuan Zhao 05/18/2015
 
@@ -34,8 +34,7 @@ function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_
 
     % Init running total of subplots
     subplot_num = 0;
-    
-    
+
 
     % For every position in pos_str
     for k = 1:numel(pos_str)
@@ -46,14 +45,14 @@ function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_
 
         sz = size(curr_life);
         num_cells = sz(1); % number of rows in current position's lifespan data, ie # of cell trajectories to plot
-        
+
         keeptraj=cell(1,num_cells);
-        
+
         % For every cell in the current traj to be plotted
         for l = 1:num_cells
 
             cell_ID = curr_life(l,1); %the trap in which the current cell is actually located, as not every cell is to be plotted and has info in curr_life
-            
+
             % Initialize current subplot
             subplot(ceil(num_cell_all/gridcol),gridcol,subplot_num+l); % (rows,cols,current position); rows = num_cell_all/gridcol rounded up; current position is the running total of subplots so far, up to this frame, plus the num of the current cell in this frame
 
@@ -78,37 +77,40 @@ function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_
             curr_trace = curr_traj(X,cell_ID,flu_1); % get current cell's fluorescence intensity values across X
 
             keeptraj{l} = [X', curr_trace];
-            
-            
+
+
             % Plot every other fluorescent channel in flu_array...
             for i = 2:numel(flu_array)
                 % Add axis for current flu channel
 
                 flu = flu_array(i);
                 curr_trace = curr_traj(X,cell_ID,flu);
-                
+
                 temptraj = keeptraj{l};
                  temptraj = cat(2,temptraj, curr_trace);
                  keeptraj{l} = temptraj;
-                 
+
 %                  tempa = keeptraj_s{l};
 %                  tempa = cat(2,tempa, smooth(curr_trace,3));
 %                  keeptraj_s{l} = tempa;
 
 %                 P = plot(X,smooth(curr_trace,3),'Color','k','LineWidth',1);
-% 
+%
 %                 axis(curr_ax, 'off', 'tight');
 %                 ylabel(curr_ax,label_array(i));
             end
-            
-            
+
+
 
             ax1 = gca; % get information for first axes, as reference for other flu channel axes
-            
+
             curr_trace = keeptraj{l}(:,2);
             cell_title = ['xy',pos,', Cell # ',num2str(cell_ID),': Replicative Lifespan = ',num2str(num_cycles)];
+
+            % If there is only one trace to plot...
+            % use the gradient to determine trace color
             if length(flu_array)==1
-                
+
                 plot(X,smooth(curr_trace,3),'Color',curr_style,'LineWidth',1);
 
                 xlabel(ax1,'Time in frames');
@@ -119,13 +121,13 @@ function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_
                 % Plot cell death type marker; 1 = normal, 2 = late daughter,
                 % 3= popped out, 4 = dying round
                 if curr_life(l,2) == 1 % square
-                    plot(life_end,curr_trace(life_end-life_start+1),'s','MarkerEdgeColor',curr_style,'MarkerFaceColor',curr_style,'Markersize',12,'LineWidth',2)
+                    plot(life_end,curr_trace(life_end-life_start+1),'s','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
                 end
                 if curr_life(l,2) == 2 % triangle
-                    plot(life_end,curr_trace(life_end-life_start+1),'>','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+                    plot(life_end,curr_trace(life_end-life_start+1),'^','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
                 end
                 if curr_life(l,2) == 3 % x
-                    plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+                    plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',12,'LineWidth',2)
                 end
                 if curr_life(l,2) == 4 % o
                     plot(life_end,curr_trace(life_end-life_start+1),'o','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
@@ -139,18 +141,20 @@ function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_
 
 
                 hold off
+
+            % If there are two traces...
             else
-                
+
                 [ax, h1, h2]=plotyy(X, keeptraj{l}(:,2),X, keeptraj{l}(:,[3:end]) );
-                
+
                 xlabel(ax(1),'Time in frames');
                 ylabel(ax(1),label_array(1));
                 ylabel(ax(2),label_array(2));
                 title(cell_title);
-                
+
                 set(h1, 'linewidth',2)
                 set(h2, 'linewidth',1.5)
-                
+
                 hold on
                 axes(ax(1));
                 xlim([life_start, life_end]);
@@ -158,22 +162,24 @@ function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_
                 for k = cycles
                     line([k k],y1,'Color','k','LineStyle','--')
                 end
-                
+
+                curr_style = 'b';
+
                  % Plot cell death type marker; 1 = normal, 2 = late daughter,
                 % 3= popped out, 4 = dying round
                 if curr_life(l,2) == 1 % square
-                    plot(life_end,curr_trace(life_end-life_start+1),'s','MarkerEdgeColor',curr_style,'MarkerFaceColor',curr_style,'Markersize',12,'LineWidth',2)
+                    plot(life_end,curr_trace(life_end-life_start+1),'s','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
                 end
                 if curr_life(l,2) == 2 % triangle
-                    plot(life_end,curr_trace(life_end-life_start+1),'>','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+                    plot(life_end,curr_trace(life_end-life_start+1),'^','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
                 end
                 if curr_life(l,2) == 3 % x
-                    plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
+                    plot(life_end,curr_trace(life_end-life_start+1),'x','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',12,'LineWidth',2)
                 end
                 if curr_life(l,2) == 4 % o
                     plot(life_end,curr_trace(life_end-life_start+1),'o','MarkerEdgeColor',curr_style,'MarkerFaceColor','w','Markersize',10,'LineWidth',2)
                 end
-                
+
                 axes(ax(2))
                 xlim([life_start, life_end]);
                 hold off
@@ -185,8 +191,8 @@ function data_single_meng(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_
         subplot_num = subplot_num + num_cells;
 
     end
-    
-    
+
+
 
     % % Get all axes handles; set y-limits of all axes
     % axh = findall(gcf,'type','axes');
