@@ -92,6 +92,6 @@ disp('all_traj and all_lifespan loaded for input positions.');
 
 % Trajectory analysis scripts
 
-traj_stat(pos,all_traj,all_lifespan)
+traj_stat(pos,all_traj,all_lifespan,1,2)
 
 %
