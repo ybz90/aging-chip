@@ -3,6 +3,8 @@
 
 %% Initialization
 
+% This code section adds aging-chip scripts to path and specifies positions to be analyzed. 
+
 % Add scripts folder to search path
 addpath('/Users/yuanz/Git/aging-chip/scripts');
 
@@ -30,13 +32,15 @@ fprintf('Processing %d frames.\n', imN);
 %
 %% Generate masks and cell trajectories
 
+% This sections runs the mask_traj code on each position specified above individually and generates masks and trajectories. It will run in parallel. 
+
 tic
 % Input the number of fluorescent channels to analyze
 fluN = input('Input # of fluorescent channels: ');
 
 parfor i = 1:posn
     curr_pos = pos{i};
-    fprintf('Generating mask and trajectories for position xy%d.\n', str2num(curr_pos));
+    fprintf('Generating mask and trajectories for position xy%d.\n', str2double(curr_pos));
     mask_traj(curr_pos,imN,fluN)
 end
 toc
@@ -69,6 +73,8 @@ for i = 1:numel(pos)
     all_lifespan{i} = lifespan_file;
 end
 
+disp('all_traj and all_lifespan loaded for input positions.');
+
 %
 %% Run Analysis & Visualization Code
 
@@ -83,8 +89,9 @@ end
 % gridcol = 6; %indicate number of columns of subplots
 % data_single(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
+
 % Trajectory analysis scripts
 
-analysis(pos,all_traj,all_lifespan)
+traj_stat(pos,all_traj,all_lifespan)
 
 %

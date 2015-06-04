@@ -1,8 +1,8 @@
-function data_single(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
+function plot_data_subplots(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
     % Plots single fluorescent channel trajectory for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding. Also includes a marker at the end of the trace to signal cell death type.
 
-    % Yuan Zhao 05/18/2015
+    % Yuan Zhao 05/29/2015
 
 
     % Min/max replicative lifespan of all cells; used to determine a gradient range for plot style color
