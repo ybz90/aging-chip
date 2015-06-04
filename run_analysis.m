@@ -1,5 +1,5 @@
 %% Pipeline wrapper for aging chip code
-% Yuan Zhao 05/13/2015
+% Yuan Zhao 06/03/2015
 
 %% Initialization
 
@@ -42,9 +42,10 @@ end
 toc
 
 %
-%% Visualization
+%% Trajectory Processing
 
-% The following code is a wrapper for the individual plotting scripts based on it. It loads every position's trajectories into all_traj and the manually curated lifespan data into all_lifespan.
+% The following code processes the output trajectories from above, based on the positions input above and xy##_lifespan.txt files specified for each positions.
+% It loads every position's trajectories into all_traj and the manually curated lifespan data into all_lifespan.
 
 % Array for storing all trajectory data across all cells
 all_traj = cell(1,numel(pos));
@@ -68,22 +69,22 @@ for i = 1:numel(pos)
     all_lifespan{i} = lifespan_file;
 end
 
+%
+%% Run Analysis & Visualization Code
 
-% Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
-flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
+% % Plotting scripts
+% % Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
+% flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
 
-% Input fluorescent channel labels
-%label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
-label_array = {'GFP','mCherry'};
+% % Input fluorescent channel labels
+% %label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
+% label_array = {'GFP','mCherry'};
 
+% gridcol = 6; %indicate number of columns of subplots
+% data_single(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
-% Run plotting scripts here
+% Trajectory analysis scripts
 
-% Individual subplots for every trajectory
-gridcol = 6; %indicate number of columns of subplots
-
-data_single(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
-%data_multi(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
-
+analysis(pos,all_traj,all_lifespan)
 
 %
