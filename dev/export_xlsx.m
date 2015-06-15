@@ -1,4 +1,4 @@
-function export_xls(pos_str,all_traj,all_lifespan,flu_array)
+function export_xlsx(pos_str,all_traj,all_lifespan,flu_array)
 
     % export_xls(pos,all_traj,all_lifespan,[1 2 3])
     % duplicate lifespan.txt, remove the ones w/ ERC and recomb or are just really low bg
@@ -85,9 +85,9 @@ function export_xls(pos_str,all_traj,all_lifespan,flu_array)
 
     %life_export
 
-    xlswrite('20150521_NTS1-NTS2-c2_mCherry.xlsx',traj_export{1}','C2 - mCherry');
-    xlswrite('20150521_NTS1-NTS2-c3_GFP.xlsx',traj_export{2}','C3 - GFP');
+    xlswrite('20150521_NTS2-NTS2-c2_mCherry.xlsx',traj_export{1}','C2 - mCherry');
+    xlswrite('20150521_NTS2-NTS2-c3_GFP.xlsx',traj_export{2}','C3 - GFP');
     %xlswrite('20150521_NTS1-NTS2-c4.xlsx',traj_export{3},'C4 - Cy5');
 
-    xlswrite('20150521_NTS1-NTS2-bud_times.xlsx',life_export,'Budding Times');
+    xlswrite('20150521_NTS2-NTS2-bud_times.xlsx',life_export,'Budding Times');
 end

@@ -56,8 +56,11 @@ function traj_stat(pos_str,all_traj,all_lifespan,tau,threshold)
     %all_trunc_traj{1}
 
 
+
+    threshold = 1;
+
     % Specify range of window sizes (tau) to test
-    tau_range = 1:10;
+    tau_range = 1:40;
     tau_eff = [];
 
     for tau = tau_range
@@ -121,7 +124,6 @@ function traj_stat(pos_str,all_traj,all_lifespan,tau,threshold)
         % Unsilencing event detection
         % Based on the threshold, representing a multiplier of the above ensemble standard deviation, if the final window average of the trajectory is greater than the threshold + that trajectory's start window average, increase one_count by 1. If it does not meet detection criterion, increase zero_count by 1.
         % Use this to find the detection efficiency of the reporter for the current window size tau and threshold.
-        threshold = 2;
 
         one_count = 0;
         zero_count = 0;
@@ -145,7 +147,10 @@ function traj_stat(pos_str,all_traj,all_lifespan,tau,threshold)
 
     end
 
-    tau_range
-    tau_eff
+    % tau_range
+    % tau_eff
+
+    figure;
+    plot(tau_range,tau_eff);
 
 end
