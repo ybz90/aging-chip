@@ -95,28 +95,7 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
                 temptraj = keeptraj{l};
                 temptraj = cat(2,temptraj, curr_trace); %horzcat
                 keeptraj{l} = temptraj;
-
-%                  tempa = keeptraj_s{l};
-%                  tempa = cat(2,tempa, smooth(curr_trace,3));
-%                  keeptraj_s{l} = tempa;
-
-%                 P = plot(X,smooth(curr_trace,3),'Color','k','LineWidth',1);
-%
-%                 axis(curr_ax, 'off', 'tight');
-%                 ylabel(curr_ax,label_array(i));
             end
-
-
-            % Add lifespan data to keeptraj final column for export
-            % For every point in X (ie lifestart:lifeend), label 1 for a budding time and 0 for all other times
-            binary_cycles = zeros(numel(X),1);
-            for q = 1:numel(cycles)
-                bud = cycles(q);
-                binary_cycles(bud) = 1;
-            end
-            temptraj = keeptraj{l};
-            temptraj = cat(2,temptraj, binary_cycles); %horzcat
-            keeptraj{l} = temptraj;
 
 
             % Plot fluorescence channel data stored in keeptraj...
@@ -128,7 +107,6 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             % If there is only one trace to plot...
             % use the gradient to determine trace color
             if length(flu_array)==1
-
                 plot(X,smooth(curr_trace,3),'Color',curr_style,'LineWidth',1);
 
                 xlabel(ax1,'Time in frames');
@@ -157,13 +135,11 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
                     line([k k],y1,'Color','k','LineStyle','--')
                 end
 
-
                 hold off
 
             % If there are two traces...
             else
-
-                [ax, h1, h2]=plotyy(X, smooth(keeptraj{l}(:,2),3),X, smooth(keeptraj{l}(:,[3:end-1]),3) );
+                [ax, h1, h2]=plotyy(X, smooth(keeptraj{l}(:,2),3),X, smooth(keeptraj{l}(:,[3:end]),3) );
 
                 xlabel(ax(1),'Time in frames');
                 ylabel(ax(1),label_array(1));
@@ -181,7 +157,7 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
                     line([k k],y1,'Color','k','LineStyle','--')
                 end
 
-                curr_style = 'b';
+                % curr_style = 'b';
 
                 %  % Plot cell death type marker; 1 = normal, 2 = late daughter,
                 % % 3= popped out, 4 = dying round
@@ -202,6 +178,29 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
                 xlim([life_start, life_end]);
                 hold off
             end
+
+
+            % Add budding time data to keeptraj final column for export
+            % Convert cycles (budding times) into binary array binary_cycles; for every point in X (ie lifestart:lifeend), label 1 for a budding time and 0 for all other times
+            binary_cycles = zeros(numel(X),1);
+            for q = 1:numel(cycles) % for every budding time
+                bud = cycles(q) - X(1) + 1; % get the frame of budding; subtract lifespan start and add 1 to correct index
+                binary_cycles(bud) = 1; % set this frame = 1 in binary_cycles
+            end
+
+            temptraj = keeptraj{l};
+            temptraj = cat(2,temptraj, binary_cycles); %horzcat
+            keeptraj{l} = temptraj;
+
+            % Add xy## and cell # as fifth column, followed by zeros
+            id_col = zeros(numel(X),1);
+            id_col(1) = str2num(pos);
+            id_col(2) = cell_ID;
+
+            temptraj = keeptraj{l};
+            temptraj = cat(2,temptraj, id_col); %horzcat
+            keeptraj{l} = temptraj;
+
         end
 
         % Increase running total of subplots so far
@@ -213,6 +212,29 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
     end
 
     % Input which trajectories to keep (they are in order in all_keeptraj) and whether to export as xlsx
-    %
+    wanted = input('Which trajectories do you want to save? [1 2 ... ]: ');
+    xlsx = input('Do you want to export trajectories in Excel format? y/n: ','s');
+
+    % Create storage cell array for wanted trajectories as a subset of all_keeptraj
+    num_wanted = numel(wanted);
+    traj_export = cell(1,num_wanted);
+
+    % Keep the selected trajectories
+    for p = 1:num_wanted
+        traj_num = wanted(p);
+        traj_export{p} = all_keeptraj{traj_num};
+    end
+
+    % Save as either xlsx (.csv w/o Office integration) or .mat
+    if xlsx == 'n' % save as .mat
+        output_name = ['traj_export.mat'];
+        save(output_name, 'traj_export');
+    else
+        output_name = ['traj_export.xlsx'];
+        % export every array (data for one cell traj) in traj_export as a separate sheet
+        for r = 1:numel(traj_export)
+            xlswrite(output_name,traj_export{r},['cell #',num2str(r)]);
+        end
+    end
 
 end
