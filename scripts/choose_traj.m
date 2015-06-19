@@ -32,6 +32,12 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
     % Figure for containing subplots of traces for each cell
     figure;
 
+    % Custom colors from rgb database
+    green = [0 0.5 0];
+    forestgreen = [0.1328 0.5430 0.1328];
+    firebrick = [0.6953 0.1328 0.1328];
+    crimson = [0.8594 0.0781 0.2344];
+
     %styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
     % Red to Black Colormap
     styles = colormap(gray); % first col of gray has 64 rows; black is [0 0 0], red is [1 0 0]
@@ -102,7 +108,7 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             ax1 = gca; % get information for first axes, as reference for other flu channel axes
 
             curr_trace = keeptraj{l}(:,2);
-            cell_title = ['xy',pos,', Cell # ',num2str(cell_ID),': Replicative Lifespan = ',num2str(num_cycles)];
+            cell_title = ['xy',pos,', Cell # ',num2str(cell_ID),': RLS = ',num2str(num_cycles)];
 
             % If there is only one trace to plot...
             % use the gradient to determine trace color
@@ -146,8 +152,10 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
                 ylabel(ax(2),label_array(2));
                 title(cell_title);
 
-                set(h1, 'linewidth',1)
-                set(h2, 'linewidth',1)
+                set(ax,{'ycolor'},{green;crimson})
+
+                set(h1, 'color',green, 'linewidth',1)
+                set(h2, 'color',crimson, 'linewidth',1)
 
                 hold on
                 axes(ax(1));

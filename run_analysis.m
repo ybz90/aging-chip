@@ -7,6 +7,7 @@
 
 % Add scripts folder to search path
 addpath('/Users/yuanz/Git/aging-chip/scripts');
+addpath('/Users/yuanz/Git/aging-chip/dev'); %folder for scripts in development
 
 % Input the position numbers to be analyzed
 pos_input = input('xy positions to analyze {01, 02, ..., 99}: ');
@@ -78,20 +79,20 @@ disp('all_traj and all_lifespan loaded for input positions.');
 %
 %% Run Analysis & Visualization Code
 
-% % Plotting scripts
-% % Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
-% flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
+% Plotting scripts
+% Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
+flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
 
-% % Input fluorescent channel labels
-% %label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
-% label_array = {'GFP','mCherry'};
+% Input fluorescent channel labels
+%label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
+label_array = {'GFP','mCherry'};
 
-% gridcol = 6; %indicate number of columns of subplots
-% data_single(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
+gridcol = 6; %indicate number of columns of subplots
+choose_traj(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
 
-% Trajectory analysis scripts
-
-traj_stat(pos,all_traj,all_lifespan,1,2)
+% % Trajectory analysis scripts
+% 
+% traj_stat(pos,all_traj,all_lifespan,1,2)
 
 %
