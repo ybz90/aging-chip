@@ -37,6 +37,8 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
     forestgreen = [0.1328 0.5430 0.1328];
     firebrick = [0.6953 0.1328 0.1328];
     crimson = [0.8594 0.0781 0.2344];
+    rgbgray = [0.5 0.5 0.5];
+    dimgray = [0.4102 0.4102 0.4102];
 
     %styles = colormap(winter); %define colormap to be used for trajectories to reflect lifespan
     % Red to Black Colormap
@@ -108,12 +110,12 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             ax1 = gca; % get information for first axes, as reference for other flu channel axes
 
             curr_trace = keeptraj{l}(:,2);
-            cell_title = ['xy',pos,', Cell # ',num2str(cell_ID),': RLS = ',num2str(num_cycles)];
+            cell_title = ['xy',pos,', cell #',num2str(cell_ID),': RLS = ',num2str(num_cycles)];
 
             % If there is only one trace to plot...
             % use the gradient to determine trace color
             if length(flu_array)==1
-                plot(X,smooth(curr_trace,3),'Color',curr_style,'LineWidth',1);
+                plot(X,smooth(curr_trace,3),'Color',curr_style,'LineWidth',1.5);
 
                 xlabel(ax1,'Time in frames');
                 ylabel(ax1,label_array(1));
@@ -138,7 +140,7 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
                 % Plot cell cycle data as vertical lines
                 y1 = get(gca,'ylim'); % height of cell cycle bar
                 for k = cycles
-                    line([k k],y1,'Color','k','LineStyle','--')
+                    line([k k],y1,'Color','k','LineStyle',':')
                 end
 
                 hold off
@@ -154,15 +156,15 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
 
                 set(ax,{'ycolor'},{green;crimson})
 
-                set(h1, 'color',green, 'linewidth',1)
-                set(h2, 'color',crimson, 'linewidth',1)
+                set(h1, 'color',green, 'linewidth',1.5)
+                set(h2, 'color',crimson, 'linewidth',1.5)
 
                 hold on
                 axes(ax(1));
                 xlim([life_start, life_end]);
                 y1 = get(gca,'ylim');
                 for k = cycles
-                    line([k k],y1,'Color','k','LineStyle','--')
+                    line([k k],y1,'Color','k','LineStyle',':')
                 end
 
                 % curr_style = 'b';

@@ -87,7 +87,7 @@ flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
 %label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
 label_array = {'GFP','mCherry'};
 
-gridcol = 6; %indicate number of columns of subplots
+gridcol = 5; %indicate number of columns of subplots
 choose_traj(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
 
