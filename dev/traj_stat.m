@@ -1,156 +1,326 @@
-function traj_stat(pos_str,all_traj,all_lifespan,tau,threshold)
+function traj_stat(traj1,flu1,traj2,flu2,w)
 
-    % DESCRIPTION
-    % tau = window size
-    % threshold = # x standard deviation
-    flu = 1;
+    % DESCRIPTION INPUTS ARE TWO CELL ARRAYS CONTAINING MATRICES IN FORMAT OF TRAJ_EXPORT; THEY SHOULD HAVE ONLY ONE CHANNEL EACH BUT ITS OK IF THEY HAVE MORE, ITS JUST THAT ONLY THE FIRST WILL BE USED, THOUGH I CAN ALLOW TWO MORE INPUTS TO SPECIFY THE CHANNEL TO BE USED AS WELL
 
-    % Yuan Zhao 06/04/2015
+    % Yuan Zhao 06/23/2015
 
+    % TO DO: IMPLEMENT AVERAGING BY WINDOW SIZE w
+    % ISSUE: WE SHOULD NOT COUNT the bud where a cell goes bye bye and buds out as the last cycle average becomes NaN for some cuz theres nothing in it.... icky icky... though i suppose it shouldnt be an issue going fwd with the chip that buds both ways. for now, made some temp lame code averaging the last two cell cycles if the last cell cycle count == X(end)?
 
-    % Initialization
-
-    % This section will process all of the trajectories of interest by truncating them to the same length (the length of the shortest valid trajectory), all ending at their death points. In other words, each trajectory will be shortened to the index range of (death time - shortest traj len):(death time).
-    % Additionally, we 'normalize' all trajectories to their final death point value by averaging them all (this death 'point' is actually an ensemble average of the final points of each trajectory, defined by window size tau), and shifting the entire trajectory up or down to reach this average.
-
-    % Determine the number of trajectories (sample size),
-    all_traj_len = []; %chronological lifespans
-
-    for c = 1:numel(pos_str) %for every position
-        curr_life = all_lifespan{c}; %load the xy##_lifespan.txt for this position
-        for d = 1:numel(curr_life(1:end,1)) %for every row (cell) in this position's lifespan config
-            traj_end = curr_life(d,4);
-            traj_start = curr_life(d,3);
-            all_traj_len(end+1) = traj_end-traj_start; %add to all_traj_len this cell's chronological lifespan
-        end
-    end
-    %all_traj_len
-
-    num_traj = numel(all_traj_len);
-    shortest_traj = min(all_traj_len);
+    % TO DO 2: PUT TRAJ1, TRAJ2 INTO CELL ARRAY; USE FOR LOOP FOR THE POPULATION OF ARRAYS WHERE l=1:2, traj = trajstore{l}, and raw, fold, absolute {l,#} goes in OKAY DOOD, I GUESS WE NEED TO DO THIS FOR FLUCH TOO
 
 
-    % Use shortest_traj length to truncate all trajectories, ending at the traj_end/death time
-    all_trunc_traj = cell(1,num_traj);
-
-    count = 1;
-    for k = 1:numel(pos_str)
-        pos = pos_str{k}; % set current position
-        curr_traj = all_traj{k}; %load current trajectory file based on position index
-        curr_life = all_lifespan{k}; %load xy##_lifespan.txt lifespan data for this position
-
-        sz = size(curr_life);
-        num_cells = sz(1); % number of rows in current position's lifespan data, ie # of cell trajectories to plot
-
-        for l = 1:num_cells
-            cell_ID = curr_life(l,1); % current cell's ID
-            traj_end = curr_life(l,4); % end point of current cell's chronological lifespan
-
-            curr_trunc_ind = traj_end - shortest_traj:traj_end; %indices of truncated trajectory
-            a = curr_traj(curr_trunc_ind,cell_ID,flu); %slice truncated trajectory from curr_traj based on curr_trunc_ind
-            all_trunc_traj{count} = a;
-
-            count = count + 1;
-        end
-    end
-    %all_trunc_traj{1}
+    % Init cell arrays for storing values of each trajectory at start, mid, max within 3 cycles of end, and end
+    %num_flu = numel(flu_array);
+    raw = cell(2,4); % store raw values
+    fold = cell(2,3); % store relative/fold change
+    absolute = cell(2,3); % store absolute change
 
 
+    % Store traj1, traj2 and flu1, flu2 in cell arrays
+    all_traj = {traj1,traj2};
+    all_flu = {flu1,flu2};
 
-    threshold = 1;
 
-    % Specify range of window sizes (tau) to test
-    tau_range = 1:40;
-    tau_eff = [];
+    % Populate raw, fold, and absolute cell arrays
 
-    for tau = tau_range
-        % Smooth trajectories by moving average of window size tau
-        %tau = 1; %debug, no smoothing
-        tau_index = 1:shortest_traj+1 - (tau-1); %range will be from start to end minus (tau-1)
+    % For each set of trajectories
+    for j = 1:2
 
-        all_tau_traj = cell(1,num_traj); %array for storing trajectories after smoothing
+        % Current set of trajectories input and flu channel to check
+        curr_traj = all_traj{j};
+        curr_flu = all_flu{j};
 
-        % for every truncated trajectory
-        for m = 1:num_traj
-            temp_traj = []; %build smoothed trajectory in this matrix
-            prev_traj = all_trunc_traj{m}; %unsmoothed trajectory
+        % Total number of cells to be plotted
+        num_cell_all = numel(curr_traj);
 
-            for n = tau_index %in the smoothed index range
-                frames_to_avg = []; %frames within the window for every index in tau_index
-                for o = n:n + tau-1
-                    %[n,o]
-                    frames_to_avg(end+1) = prev_traj(o);
+        % For every cell in curr_traj...
+        for k = 1:num_cell_all
+
+            % Get curr_cell data from curr_traj
+            curr_cell = curr_traj{k};
+
+            % Use fluoresence data for channel curr_flu in curr_traj
+            flu_data = curr_cell(:,curr_flu+1);
+
+            % Get raw values of initial, mid, max near end, and end and store in raw{l,1-4} respectively
+            % Also, calculate fold and absolute change and store in fold/absolute{l,1-3} respectively
+
+            % init
+            initval = flu_data(1);
+            raw{j,1} = horzcat(raw{j,1},initval);
+
+            % get budding times            
+            budvals = curr_cell(:,end-1);
+            X = curr_cell(:,1);
+            cycles = []; % get list of budding cell times
+            for m = 1:numel(budvals)
+                if budvals(m) == 1
+                    cycles(end+1) = X(m); 
                 end
-                curr_avg = mean(frames_to_avg);
-                temp_traj(end+1) = curr_avg;
-
             end
+            cycles = sort(cycles);
 
-            all_tau_traj{m} = temp_traj;
-        end
-        %all_tau_traj{1}
-        %all_tau_traj{3} == (all_trunc_traj{3})' %debug; check equivalence with tau = 1
+            % mid
+            %midpoint = ceil(length(flu_data)/2);
+            %midval = flu_data(midpoint);
+            % average of middle cycle
+            midpoint = floor(numel(cycles)/2);
+            mid_start = cycles(midpoint);
+            mid_end = cycles(midpoint+1);
+            midval = mean(flu_data(mid_start-X(1)+1:mid_end-X(1)+1));
+            raw{j,2} = horzcat(raw{j,2},midval); % store raw value
+            fold{j,1} = horzcat(fold{j,1},midval/initval); % divide by initval
+            absolute{j,1} = horzcat(absolute{j,1},midval-initval); % subtract initval
 
+            % max_end (max near end within a certain # of cell cycles)
+            allow_cycles = 3; % # of cell cycles to track back from end to find max
+            tr_start = cycles(end-allow_cycles+1);
+            max_end = max(flu_data(tr_start-X(1)+1:end));
+            raw{j,3} = horzcat(raw{j,3},max_end);
+            fold{j,2} = horzcat(fold{j,2},max_end/initval);
+            absolute{j,2} = horzcat(absolute{j,2},max_end-initval);
 
-        % Adjust curves via average of all traj last window
-        all_last = [];
-        for p = 1:num_traj %for every smoothed trajectory
-            curr_traj = all_tau_traj{p};
-            all_last(end+1) = curr_traj(end); %take its final window value
-        end
-        %calculate average of last window for all trajectories; add or subtract the entire trajectories for each one to normalize their end window value to this mean
-        avg_last = mean(all_last)
-        %std_last = std(all_last)
-
-        all_adj_traj = cell(1,num_traj); % store trajectories after subtraction of delta
-        for q = 1:num_traj;
-            curr_traj = all_tau_traj{q}; % for every smoothed traj
-            delta = curr_traj(end) - avg_last; % find the delta from its end window and the overall mean for end windows
-            all_adj_traj{q} = curr_traj - delta; % subtract this delta from all values in array
-        end
-
-
-        % Emsemble average of end-adjusted trajectory start windows
-        % This section takes the ensemble average of the tau start points of each trajectory (moving window of size tau) and finds the ensemble standard deviation as well.
-        all_start = [];
-        for r = 1:num_traj %for every smoothed trajectory
-            curr_traj = all_adj_traj{r}; % of the trajectories adjusted for end window value sync
-            all_start(end+1) = curr_traj(1); %take its first window value
-        end
-        avg_start = mean(all_start);
-        std_start = std(all_start)
-
-
-        % Unsilencing event detection
-        % Based on the threshold, representing a multiplier of the above ensemble standard deviation, if the final window average of the trajectory is greater than the threshold + that trajectory's start window average, increase one_count by 1. If it does not meet detection criterion, increase zero_count by 1.
-        % Use this to find the detection efficiency of the reporter for the current window size tau and threshold.
-
-        one_count = 0;
-        zero_count = 0;
-
-        for s = 1:num_traj
-            curr_traj = all_adj_traj{s};
-            curr_start = curr_traj(1); %start window value of current traj
-            target = curr_start + threshold*std_start; %threshold value = curr_start + x*std; end window must exceed this to count as 1
-            if avg_last > target
-                one_count = one_count + 1;
+            % end
+            %endval = flu_data(end);
+            % average of last cell cycle
+            % TEMPORARY MEASURE DUE TO RECORDING TIME OF LAST BUD == X(end) FROM BUDDING OUT
+            % FOR NEW DATA WITH BI-DIRECTIONAL BUDDING, WE CAN JUST DO LAST=CYCLES(END); FLUDATA(LAST-X+1:END)
+            if cycles(end) == X(end)
+                last_start = cycles(end-1);
+                endval = mean(flu_data(last_start-X(1)+1:end));
             else
-                zero_count = zero_count + 1;
+                last_start = cycles(end);
+                endval = mean(flu_data(last_start-X(1)+1:end));
             end
+            raw{j,4} = horzcat(raw{j,4},endval);
+            fold{j,3} = horzcat(fold{j,3},endval/initval);
+            absolute{j,3} = horzcat(absolute{j,3},endval-initval);
+
         end
-
-        % calculate efficiency
-        efficiency = one_count/(one_count+zero_count)
-
-        % store in tau_eff matrix
-        tau_eff(end+1) = efficiency;
 
     end
 
-    % tau_range
-    % tau_eff
 
-    figure;
-    plot(tau_range,tau_eff);
+    % Plot violin plots of distributions for the three cell arrays
+
+    % figure; 
+    % %title
+
+    % % Raw values subplot
+    % subplot(3,6,1);
+    % % sub title
+    % % legend
+    % % y-axis, x-axis
+    % % calculate mu, std for every matrix in cell array raw
+    % mu_std_raw = cell(1,2); % holds the means and standard deviations of every mat in raw; there are up to 2 rows of matricies for each flu channel and two columns per row for mean and std respectively
+    % for n = 1:4
+    %     raw{1,n};
+    %     mu = mean(raw{1,n});
+    %     stddev = std(raw{1,n});
+    %     mu_std_raw{1,1} = horzcat(mu_std_raw{1,1},mu);
+    %     mu_std_raw{1,2} = horzcat(mu_std_raw{1,2},stddev); 
+    % end
+
+    % % PLOT VIOLIN FOR 1 VS 2
+    % a = sort(raw{1,2});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,2);
+    % a = sort(raw{2,2});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+    % subplot(3,6,3);
+    % a = sort(raw{1,3});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,4);
+    % a = sort(raw{2,3});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+    % subplot(3,6,5);
+    % a = sort(raw{1,4});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,6);
+    % a = sort(raw{2,4});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+
+    % subplot(3,6,7);
+    % a = sort(fold{1,1});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,8);
+    % a = sort(fold{2,1});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+    % subplot(3,6,9);
+    % a = sort(fold{1,2});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,10);
+    % a = sort(fold{2,2});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+    % subplot(3,6,11);
+    % a = sort(fold{1,3});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,12);
+    % a = sort(fold{2,3});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+
+    % subplot(3,6,13);
+    % a = sort(absolute{1,1});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,14);
+    % a = sort(absolute{2,1});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+    % subplot(3,6,15);
+    % a = sort(absolute{1,2});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,16);
+    % a = sort(absolute{2,2});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+    % subplot(3,6,17);
+    % a = sort(absolute{1,3});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[-90 90])
+    % b = get(gca,'xlim')
+
+    % subplot(3,6,18);
+    % a = sort(absolute{2,3});
+    % %a = a(1:end-1);
+    % histogram(a,25)
+    % set(gca,'view',[90 -90])
+    % xlim(b)
+
+figure;
+
+    s1 = subplot(1,3,1);
+    a = sort(fold{1,1});
+    a = a(1:end-1);
+    b = sort(fold{2,1});
+    %b = b(1:end-1);
+    bihist(a,b,50);
+    % PLOT BOX PLOTS? MAYBE ADD THIS TO BIHIST
+    hold on
+    plot(xlim/2,[1 1],'k:')
+    axis off
+    p1 = get(s1,'pos');
+    p1(3) = 0.25;
+    %p1(1) = p1(1);
+    set(s1,'pos',p1);
+
+    s2 = subplot(1,3,2);
+    a = sort(fold{1,2});
+    a = a(1:end-1);
+    b = sort(fold{2,2});
+    %b = b(1:end-1);
+    bihist(a,b,50);
+    % PLOT BOX PLOTS? MAYBE ADD THIS TO BIHIST
+    hold on
+    plot(xlim/2,[1 1],'k:')
+    axis off
+    p2 = get(s2,'pos');
+    p2(3) = 0.25;
+    %p2(1) = p2(1) - 0.03;
+    p2(1) = p1(1) + 0.25;
+    set(s2,'pos',p2);
+
+    s3 = subplot(1,3,3);
+    a = sort(fold{1,3});
+    a = a(1:end-1);
+    b = sort(fold{2,3});
+    %b = b(1:end-1);
+    bihist(a,b,50);
+    % PLOT BOX PLOTS? MAYBE ADD THIS TO BIHIST
+    hold on
+    plot(xlim/2,[1 1],'k:')
+    %axis off
+    p3 = get(s3,'pos');
+    p3(3) = 0.25;
+    %p3(1) = p3(1)-0.06;
+    p3(1) = p1(1) + 0.5;
+    set(s3,'pos',p3);
+
+
+    title('NTS1 v URA3; fold change at mid avg, max end, and max avg');
+
+
+    % % Fold change subplot
+    % subplot(1,6,2);
+    % % sub title
+    % % legend
+    % % y-axis, x-axis
+    % % calculate mu, std for every matrix in cell array fold
+
+    % % PLOT VIOLIN FOR 1 OR 2
+
+    % % Raw values subplot
+    % subplot(1,6,3);
+    % % sub title
+    % % legend
+    % % y-axis, x-axis
+    % % calculate mu, std for every matrix in cell array absolute
+
+
+    % Plot scatterplot correlating lifespan with values, fold change, and absolute change
+    %%%%
 
 end

@@ -1,13 +1,13 @@
 %% Pipeline wrapper for aging chip code
-% Yuan Zhao 06/03/2015
+% Yuan Zhao 06/23/2015
 
 %% Initialization
 
-% This code section adds aging-chip scripts to path and specifies positions to be analyzed. 
+% This code section adds aging-chip scripts to path and specifies positions to be analyzed.
 
 % Add scripts folder to search path
-addpath('/Users/yuanz/Git/aging-chip/scripts');
-addpath('/Users/yuanz/Git/aging-chip/dev'); %folder for scripts in development
+addpath('/media/yuanz/Data/aging-chip/scripts');
+addpath('/media/yuanz/Data/aging-chip/dev'); %folder for scripts in development
 
 % Input the position numbers to be analyzed
 pos_input = input('xy positions to analyze {01, 02, ..., 99}: ');
@@ -33,7 +33,7 @@ fprintf('Processing %d frames.\n', imN);
 %
 %% Generate masks and cell trajectories
 
-% This sections runs the mask_traj code on each position specified above individually and generates masks and trajectories. It will run in parallel. 
+% This sections runs the mask_traj code on each position specified above individually and generates masks and trajectories. It will run in parallel.
 
 tic
 % Input the number of fluorescent channels to analyze
@@ -42,7 +42,7 @@ fluN = input('Input # of fluorescent channels: ');
 parfor i = 1:posn
     curr_pos = pos{i};
     fprintf('Generating mask and trajectories for position xy%d.\n', str2double(curr_pos));
-    mask_traj(curr_pos,imN,fluN)
+    gen_mask_traj(curr_pos,imN,fluN)
 end
 toc
 
@@ -76,23 +76,25 @@ end
 
 disp('all_traj and all_lifespan loaded for input positions.');
 
-%
-%% Run Analysis & Visualization Code
 
-% Plotting scripts
+% Choose the trajectories to be exported
 % Input fluorescent channels to plot (c2 = 1, c3 = 2, etc.)
 flu_array = input('Fluorescent channels to plot [1 2 ...]: ');
 
 % Input fluorescent channel labels
 %label_array = input('Fluorescent channel labels {'GFP','irFP',etc.}');
-label_array = {'GFP','mCherry'};
+label_array = {'mCherry','GFP'};
 
 gridcol = 5; %indicate number of columns of subplots
 choose_traj(pos,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
+%
+%% Run Analysis & Visualization Code
 
-% % Trajectory analysis scripts
-% 
-% traj_stat(pos,all_traj,all_lifespan,1,2)
+% Plot trajectories
+%traj_viewer(traj_export,5,flu_array,label_array)
+
+% Trajectory analysis scripts
+traj_stat(norm_export,1,norm_export,2,1)
 
 %

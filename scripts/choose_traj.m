@@ -1,9 +1,11 @@
 function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
     % Plots single fluorescent channel trajectory for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding. Also includes a marker at the end of the trace to signal cell death type.
-    % UPDATE DESCRIPTION
+    % Then, the user can specify which of the subplots plots (ie cells) that should be saved as well as the output file name and whether or not to save as .mat or .xlsx. 
+    % The output format is as follows: a cell array (resulting from concat of keeptraj{l} of each position), in which each subarray corresponds to to one cell.
+    % The subarray has the format: n rows (where n is the # of frames for that cell's trajectories) by the following columns; (1) X: the chronological life range of the cell, (2 : end-2) fluorescence channel data, (end-1) budding times where 0 is no bud and 1 is a bud, and (end) metadata column containing xy_pos, cell_ID, and death type. 
 
-    % Yuan Zhao 06/18/2015
+    % Yuan Zhao 06/23/2015
 
 
     % Total number of cells to be plotted
@@ -82,11 +84,6 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             cycles = cycles(cycles>0); %remove all 0 entries in the cycles array
             num_cycles = numel(cycles); %replicative life span (# of buds) for current cell, after 0s are removed
 
-            % Define current style, based on num budding cycles and colormap from above
-            curr_style_idx = ceil((num_cycles/(max_cycles))*style_num);
-            curr_style = styles(curr_style_idx,:);
-
-
             % Store the first fluorescent channel in flu_array
             flu_1 = flu_array(1);
             curr_trace = curr_traj(X,cell_ID,flu_1); % get current cell's fluorescence intensity values across X
@@ -115,6 +112,11 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             % If there is only one trace to plot...
             % use the gradient to determine trace color
             if length(flu_array)==1
+
+                % Define current style, based on num budding cycles and colormap from above
+                curr_style_idx = ceil((num_cycles/(max_cycles))*style_num);
+                curr_style = styles(curr_style_idx,:);
+
                 plot(X,smooth(curr_trace,3),'Color',curr_style,'LineWidth',1.5);
 
                 xlabel(ax1,'Time in frames');
@@ -156,8 +158,8 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
 
                 set(ax,{'ycolor'},{green;crimson})
 
-                set(h1, 'color',green, 'linewidth',1.5)
-                set(h2, 'color',crimson, 'linewidth',1.5)
+                set(h2, 'color',green, 'linewidth',1.5)
+                set(h1, 'color',crimson, 'linewidth',1.5)
 
                 hold on
                 axes(ax(1));
@@ -202,10 +204,11 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
             temptraj = cat(2,temptraj, binary_cycles); %horzcat
             keeptraj{l} = temptraj;
 
-            % Add xy## and cell # as fifth column, followed by zeros
+            % Add xy## and cell # and death type as fifth column, followed by zeros
             id_col = zeros(numel(X),1);
             id_col(1) = str2num(pos);
             id_col(2) = cell_ID;
+            id_col(3) = curr_life(l,2);
 
             temptraj = keeptraj{l};
             temptraj = cat(2,temptraj, id_col); %horzcat
@@ -224,6 +227,7 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
     % Input which trajectories to keep (they are in order in all_keeptraj) and whether to export as xlsx
     wanted = input('Which trajectories do you want to save? [1 2 ... ]: ');
     xlsx = input('Do you want to export trajectories in Excel format? y/n: ','s');
+    traj_name = input('What do you want to name your output?:','s');
 
     % Create storage cell array for wanted trajectories as a subset of all_keeptraj
     num_wanted = numel(wanted);
@@ -237,10 +241,10 @@ function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array
 
     % Save as either xlsx (.csv w/o Office integration) or .mat
     if xlsx == 'n' % save as .mat
-        output_name = ['traj_export.mat'];
+        output_name = [traj_name,'.mat'];
         save(output_name, 'traj_export');
     else
-        output_name = ['traj_export.xlsx'];
+        output_name = [traj_name,'.xlsx'];
         % export every array (data for one cell traj) in traj_export as a separate sheet
         for r = 1:numel(traj_export)
             xlswrite(output_name,traj_export{r},['cell #',num2str(r)]);

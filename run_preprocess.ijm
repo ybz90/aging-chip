@@ -5,7 +5,7 @@
 
 
 //Import manually set variable configuration
-directory = "/Volumes/Work HD/aging/20150513_NH0285 test/";
+directory = "/Volumes/Secretariat/aging/20150521_NTS1-NTS2/";
 
 config = File.openAsString(directory+"run_preprocess_config.txt");
 config = split(config,"\n"); //split each line of config

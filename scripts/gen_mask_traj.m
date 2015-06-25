@@ -1,4 +1,4 @@
-function mask_traj(pos,imN,fluN)
+function gen_mask_traj(pos,imN,fluN)
 
     % mask_traj.m is used to generate a mask from the nuclear marker images and produce trajectories for the mother cells in each trap.
 
