@@ -1,4 +1,4 @@
-function norm_trajexport(traj_export,flu_ch,scale)
+function norm_export(traj_export,flu_ch,scale)
 
     % Takes as input a traj_export, flu_ch, and the calculated scaling factor and multiples the appropriate flu_ch by the scaling factor.
 
@@ -38,3 +38,14 @@ output_name = [traj_name,'.mat'];
 save(output_name,'norm_export');
 
 end
+
+
+% % USAGE EXAMPLE
+% What do you want to name your output?: xy21-30_norm
+% >> clear traj_export, clear norm_export
+% >> load('/run/user/1000/gvfs/smb-share:server=hao-nas.ucsd.edu,share=aging/SCerevisiae/analyzed data/20150521_NTS1-NTS2/selected/xy31-40_seleted.mat')
+% >> norm_trajexport(traj_export,1,1000/780.6428)
+% What do you want to name your output?: temp
+% >> load('temp.mat')
+% >> norm_trajexport(norm_export,2,1000/712.7441)
+% What do you want to name your output?: xy31-40_norm
