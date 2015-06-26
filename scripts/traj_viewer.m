@@ -111,10 +111,10 @@ function traj_viewer(traj_export,gridcol,flu_array,label_array)
             ylabel(ax(2),label_array(2));
             title(cell_title);
 
-            set(ax,{'ycolor'},{green;crimson})
+            set(ax,{'ycolor'},{crimson;green})
 
-            set(h2, 'color',green, 'linewidth',1.5)
             set(h1, 'color',crimson, 'linewidth',1.5)
+            set(h2, 'color',green, 'linewidth',1.5)
 
             hold on
             axes(ax(1));
