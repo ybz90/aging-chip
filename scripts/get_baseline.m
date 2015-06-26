@@ -9,6 +9,7 @@ function get_baseline(traj_export,flu_ch)
     % Total number of cells to be plotted
     num_cell_all = numel(traj_export);
 
+
     % Initial values for each trajectory in traj_export
     initial = [];
 
@@ -18,10 +19,23 @@ function get_baseline(traj_export,flu_ch)
         % Get curr_cell data from traj_export
         curr_cell = traj_export{k};
 
-        % Initial value of curr_cell for flu_ch
-        i_0 = curr_cell(1,flu_ch+1);
+        % Get budding time indices for current cell
+        budvals = curr_cell(:,end-1);
+        indices = []; %
+        for m = 1:numel(budvals)
+            if budvals(m) == 1
+                indices(end+1) = m;
+            end
+        end
 
-        initial(end+1) = i_0;
+        % % Initial value of curr_cell for flu_ch
+        % i_0 = curr_cell(1,flu_ch+1);
+
+        % Average value of initial cell cycle of curr_cell for flu_ch
+        cycle_0 = curr_cell(1:indices(1),flu_ch+1); % values of init cell cycle
+        i_0 = mean(cycle_0); % average value of init cell cycle
+
+        initial(end+1) = i_0; 
 
     end
 
