@@ -50,13 +50,13 @@ function traj_stat(traj1,flu1,traj2,flu2,w)
             initval = flu_data(1);
             raw{j,1} = horzcat(raw{j,1},initval);
 
-            % get budding times            
+            % get budding times
             budvals = curr_cell(:,end-1);
             X = curr_cell(:,1);
             cycles = []; % get list of budding cell times
             for m = 1:numel(budvals)
                 if budvals(m) == 1
-                    cycles(end+1) = X(m); 
+                    cycles(end+1) = X(m);
                 end
             end
             cycles = sort(cycles);
@@ -104,7 +104,7 @@ function traj_stat(traj1,flu1,traj2,flu2,w)
 
     % % Plot violin plots of distributions for the three cell arrays
 
-    % figure; 
+    % figure;
     % %title
 
     % % Raw values subplot
@@ -119,7 +119,7 @@ function traj_stat(traj1,flu1,traj2,flu2,w)
     %     mu = mean(raw{1,n});
     %     stddev = std(raw{1,n});
     %     mu_std_raw{1,1} = horzcat(mu_std_raw{1,1},mu);
-    %     mu_std_raw{1,2} = horzcat(mu_std_raw{1,2},stddev); 
+    %     mu_std_raw{1,2} = horzcat(mu_std_raw{1,2},stddev);
     % end
 
     % % PLOT VIOLIN FOR 1 VS 2

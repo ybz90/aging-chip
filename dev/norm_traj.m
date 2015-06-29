@@ -1,4 +1,4 @@
-function norm_export(traj_export,flu_ch,scale)
+function norm_traj(traj_export,flu_ch,scale)
 
     % Takes as input a traj_export, flu_ch, and the calculated scaling factor and multiples the appropriate flu_ch by the scaling factor.
 

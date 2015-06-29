@@ -1,7 +1,7 @@
 function traj_viewer(traj_export,gridcol,flu_array,label_array)
 
     % Plots single fluorescent channel trajectory for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding. Also includes a marker at the end of the trace to signal cell death type.
-    % Uses the traj_export output from choose_traj.m, plotting only the selected trajectories. 
+    % Uses the traj_export output from choose_traj.m, plotting only the selected trajectories.
 
     % Yuan Zhao 06/22/2015
 
@@ -65,7 +65,7 @@ function traj_viewer(traj_export,gridcol,flu_array,label_array)
         cycles = [];
         for m = 1:numel(budvals)
             if budvals(m) == 1
-                cycles(end+1) = X(m); 
+                cycles(end+1) = X(m);
             end
         end
         num_cycles = numel(cycles);

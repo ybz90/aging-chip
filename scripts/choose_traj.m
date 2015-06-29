@@ -1,9 +1,9 @@
 function choose_traj(pos_str,gridcol,all_traj,all_lifespan,flu_array,label_array)
 
     % Plots single fluorescent channel trajectory for every cell of the input xy positions in its own subplot, along with vertical lines marking the times of cell budding. Also includes a marker at the end of the trace to signal cell death type.
-    % Then, the user can specify which of the subplots plots (ie cells) that should be saved as well as the output file name and whether or not to save as .mat or .xlsx. 
+    % Then, the user can specify which of the subplots plots (ie cells) that should be saved as well as the output file name and whether or not to save as .mat or .xlsx.
     % The output format is as follows: a cell array (resulting from concat of keeptraj{l} of each position), in which each subarray corresponds to to one cell.
-    % The subarray has the format: n rows (where n is the # of frames for that cell's trajectories) by the following columns; (1) X: the chronological life range of the cell, (2 : end-2) fluorescence channel data, (end-1) budding times where 0 is no bud and 1 is a bud, and (end) metadata column containing xy_pos, cell_ID, and death type. 
+    % The subarray has the format: n rows (where n is the # of frames for that cell's trajectories) by the following columns; (1) X: the chronological life range of the cell, (2 : end-2) fluorescence channel data, (end-1) budding times where 0 is no bud and 1 is a bud, and (end) metadata column containing xy_pos, cell_ID, and death type.
 
     % Yuan Zhao 06/23/2015
 
