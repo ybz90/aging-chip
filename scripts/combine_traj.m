@@ -1,10 +1,9 @@
-function combine_same_traj(traj_array,flu_keep)
+function combine_traj(traj_array,flu_keep)
 
-	% Inputs are a set of cell arrays in the format of traj/norm_export and an array indicating which flu channel to keep in that particular array
-	% then we will take those cell arrays, discard all unwanted flu channels, and combine them all into a super array
-	% the intended use is to combine the same type of data (e.g. all NTS data) from multiple experiments into one array, provided conditions are similar or the data has been normalized with get_baseline and then norm_traj
-
-	% yz 6/26
+	% Inputs are two arrays; one corresponding to a set of cell arrays that contain matrices in standard trajectory matrix (STM) format, and the other is a list of the respective fluorescent channels to be kept in each of the input cell arrays
+	% For each pair of STM-containing cell array and respective fluorescent channel, this code removes all other fluorescent channels from the matrices in that cell array
+	% Then, all of these 'cleaned' cell arrays are horizontally concatenated to combine all of the STMs into a single, large cell array
+	% The intend use is to combine compatible data from multiple experiments (e.g. all NTS2 from identical conditions in multiple experiments; or NTS2 from various conditions after 'pseudo-normalization') into a single array of STMs with just one fluorescent dat a channel
 
 	traj_all = {};
 
