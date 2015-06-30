@@ -1,13 +1,10 @@
-function traj_stat(traj1,flu1,traj2,flu2,w)
+function violin_dist(traj1,flu1,traj2,flu2,w)
 
     % DESCRIPTION INPUTS ARE TWO CELL ARRAYS CONTAINING MATRICES IN FORMAT OF TRAJ_EXPORT; THEY SHOULD HAVE ONLY ONE CHANNEL EACH BUT ITS OK IF THEY HAVE MORE, ITS JUST THAT ONLY THE FIRST WILL BE USED, THOUGH I CAN ALLOW TWO MORE INPUTS TO SPECIFY THE CHANNEL TO BE USED AS WELL
 
-    % Yuan Zhao 06/23/2015
 
     % TO DO: IMPLEMENT AVERAGING BY WINDOW SIZE w
     % ISSUE: WE SHOULD NOT COUNT the bud where a cell goes bye bye and buds out as the last cycle average becomes NaN for some cuz theres nothing in it.... icky icky... though i suppose it shouldnt be an issue going fwd with the chip that buds both ways. for now, made some temp lame code averaging the last two cell cycles if the last cell cycle count == X(end)?
-
-    % TO DO 2: PUT TRAJ1, TRAJ2 INTO CELL ARRAY; USE FOR LOOP FOR THE POPULATION OF ARRAYS WHERE l=1:2, traj = trajstore{l}, and raw, fold, absolute {l,#} goes in OKAY DOOD, I GUESS WE NEED TO DO THIS FOR FLUCH TOO
 
 
     % Init cell arrays for storing values of each trajectory at start, mid, max within 3 cycles of end, and end
