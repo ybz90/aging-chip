@@ -21,12 +21,13 @@ function norm_traj(input_traj)
         cycles = []; % get list of budding cell times
         for m = 1:numel(budvals)
             if budvals(m) == 1
-                cycles(end+1) = X(m);
+                cycles(end+1) = m;
             end
         end
         cycles = sort(cycles);
         for j = 1:num_flu
-            init_cycle = mean(curr_cell(1:cycles(1),j+1)); %get average of first cycle, for current flu channel
+            curr_flu = curr_cell(1:cycles(1), j+1);
+            init_cycle = mean(curr_flu); %get average of first cycle, for current flu channel
             init_values(j,i) = init_cycle; %add average to init_values
         end
     end
@@ -42,9 +43,9 @@ function norm_traj(input_traj)
     % Normalize each STM according to the mean and standard deviations for each channel
     for l = 1:num_cells
         curr_cell = input_traj{l}; %get old STM
-        temp_STM = curr_cell{:,1}; %init new, normalized STM; retain first column (time frames)
+        temp_STM = curr_cell(:,1); %init new, normalized STM; retain first column (time frames)
         for n = 1:num_flu %normalize flu data and add columns to new STM
-            old_flu = curr_cell(:,l+1);
+            old_flu = curr_cell(:,n+1);
             num_data = numel(old_flu);
 
             curr_mean = mean_std(n,1);
