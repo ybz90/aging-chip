@@ -94,7 +94,8 @@ function export_traj_dist(curr_traj,curr_flu,w)
     % export distribution of raw, fold, or abs as a separate .csv for each of the five time points
     % NOTE: for now, manually edit this code to choose which one to export and the export name
 
-    export_name = 'raw_stdnorm';
+    %export_name = 'NTS1_stdnorm_raw';
+    export_name = 'NTS2_fob1d_stdnorm_raw';
 
     for r = 1:numel(raw)
         xlswrite([export_name,'_',num2str(r)],raw{r});
