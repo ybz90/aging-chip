@@ -46,7 +46,7 @@ function export_traj_dist(curr_traj,curr_flu,w)
         raw{1} = horzcat(raw{1},init_val);
 
         fold{1} = horzcat(fold{1},1);
-        change{1} = horzcat(fold{1},1);
+        absolute{1} = horzcat(fold{1},1);
 
         % 1/4th cycle
         quart_point = floor(numel(cycles)/4);
@@ -95,7 +95,7 @@ function export_traj_dist(curr_traj,curr_flu,w)
     % NOTE: for now, manually edit this code to choose which one to export and the export name
 
     %export_name = 'NTS1_stdnorm_raw';
-    export_name = 'NTS2_fob1d_stdnorm_raw';
+    export_name = 'NTS2fob1d_200_raw';
 
     for r = 1:numel(raw)
         xlswrite([export_name,'_',num2str(r)],raw{r});
