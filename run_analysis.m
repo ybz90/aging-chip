@@ -6,8 +6,8 @@
 % This code section adds aging-chip scripts to path and specifies positions to be analyzed.
 
 % Add scripts folder to search path
-addpath('/media/yuanz/Data/aging-chip/scripts');
-addpath('/media/yuanz/Data/aging-chip/dev'); %folder for scripts in development
+addpath('/Users/yuanz/Git/aging-chip/scripts');
+addpath('/Users/yuanz/Git/aging-chip/dev'); %folder for scripts in development
 
 % Input the position numbers to be analyzed
 pos_input = input('xy positions to analyze {01, 02, ..., 99}: ');
